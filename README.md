@@ -3,7 +3,7 @@
 หาคอร์ทแบดติดกัน 2 คอร์ทที่ว่างพร้อมกันต่อเนื่อง 2 ชม. ที่สนามแบดมินตันพิริยะ
 สำหรับวันศุกร์ เสาร์ และอาทิตย์ของสัปดาห์ถัดไป
 
-- **หน้าเว็บ**: GitHub Pages ของ repo นี้ (`index.html` อ่าน `latest.json`)
+- **หน้าเว็บ**: https://seazabuky.github.io/badminton-court-watch/ (`index.html` อ่าน `latest.json`)
 - **อัปเดตอัตโนมัติ**: workflow `Check courts` รันทุกวันศุกร์ เสาร์ อาทิตย์ ราว 11:07 เวลาไทย
   แล้ว commit `latest.json` กับ `state.json` กลับเข้า repo
 - **รันเองทันที**: แท็บ Actions → Check courts → Run workflow
