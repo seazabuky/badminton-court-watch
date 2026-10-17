@@ -94,6 +94,14 @@ def window_view(data: dict, lo: int, hi: int) -> dict:
 def load_prev(path: str, file: Path) -> dict | None:
     if path == "none":
         return None
+    if path.startswith("git:"):
+        # เช่น git:HEAD = latest.json ของ commit ล่าสุด (ใช้ใน workflow ก่อน commit ผลใหม่)
+        try:
+            raw = subprocess.run(["git", "show", f"{path[4:]}:{file.name}"], cwd=file.parent,
+                                 capture_output=True, text=True, check=True).stdout
+            return json.loads(raw)
+        except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
+            return None
     if path != "auto":
         try:
             return json.loads(Path(path).read_text(encoding="utf-8"))
@@ -118,7 +126,7 @@ def main() -> None:
     ap.add_argument("--file", type=Path, default=Path(__file__).with_name("latest.json"))
     ap.add_argument("--from", dest="lo", default="15:00", help="เริ่มเล่นเร็วสุด")
     ap.add_argument("--to", dest="hi", default="19:00", help="เริ่มเล่นช้าสุด")
-    ap.add_argument("--prev", default="auto", help="auto | none | path ของ latest.json รอบก่อน")
+    ap.add_argument("--prev", default="auto", help="auto | none | git:<rev> | path ของ latest.json รอบก่อน")
     args = ap.parse_args()
 
     try:
