@@ -5,6 +5,7 @@ notify_text.py
 แปลง latest.json เป็นข้อความสั้นสำหรับส่งเข้ามือถือ
 - กรองเฉพาะเวลาเริ่มเล่นในช่วงที่สนใจ (ค่าเริ่มต้น 15:00-19:00)
 - แยกพื้นยาง / พื้นมาสติก ชัดเจน
+- แสดงเป็นรอบเล่นยาว 2 ชม. ที่ไม่ซ้อนกัน ไล่จากเวลาเริ่มเร็วสุด
 - เทียบกับ latest.json ของ commit ก่อนหน้า (ถ้าเป็นสัปดาห์เป้าหมายเดียวกัน)
 
 ตัวอย่าง
@@ -56,6 +57,18 @@ def ranges(starts: list[int], step: int = 30) -> str:
             out.append(hhmm(a) if a == b else f"{hhmm(a)}–{hhmm(b)}")
             a = b = s
     out.append(hhmm(a) if a == b else f"{hhmm(a)}–{hhmm(b)}")
+    return ", ".join(out)
+
+
+def slots(starts: list[int], dur: int) -> str:
+    """เวลาเริ่มที่เป็นไปได้ -> รอบเล่นยาว dur นาทีที่ไม่ซ้อนกัน ไล่จากเร็วสุด
+    [900, 930, 960] (dur 120) -> '15:00–17:00'
+    [900 ... 1140] -> '15:00–17:00, 17:00–19:00, 19:00–21:00'"""
+    out, free_from = [], -1
+    for s in sorted(set(starts)):
+        if s >= free_from:
+            out.append(f"{hhmm(s)}–{hhmm(s + dur)}")
+            free_from = s + dur
     return ", ".join(out)
 
 
@@ -148,9 +161,9 @@ def main() -> None:
                     now_s, old_s = set(pairs.get(pair, [])), set(before_floor.get(pair, []))
                     tag = f"{SHORT_DOW.get(dow_of[d['date']], '')} {th_date(d['date'])} {floor} {pair}"
                     if old_s - now_s:
-                        diffs.append(f"− หายไป {tag} เริ่ม {ranges(list(old_s - now_s))}")
+                        diffs.append(f"− หายไป {tag} {slots(list(old_s - now_s), dur)}")
                     if now_s - old_s:
-                        diffs.append(f"+ ว่างเพิ่ม {tag} เริ่ม {ranges(list(now_s - old_s))}")
+                        diffs.append(f"+ ว่างเพิ่ม {tag} {slots(list(now_s - old_s), dur)}")
         pu_d, pu_t = prev["updated"].split(" ")
         lines.append("")
         if diffs:
@@ -175,12 +188,10 @@ def main() -> None:
             pairs = view[d["date"]].get(g["name"], {})
             found = [(p, s) for p, s in sorted(pairs.items(), key=lambda kv: pair_key(kv[0])) if s]
             if not found:
-                lines.append("• ไม่มีคู่ว่างในช่วงนี้")
+                lines.append("- ไม่มีคู่ว่างในช่วงนี้")
             for p, s in found:
-                lines.append(f"• คอร์ท {p}  เริ่ม {ranges(s)}")
+                lines.append(f"- คอร์ท {p}  {slots(s, dur)}")
 
-    lines.append("")
-    lines.append(f"(“เริ่ม 15:00–16:00” = เริ่มเวลาไหนก็ได้ในช่วงนั้นทุกครึ่งชั่วโมง แล้วเล่นครบ {dur // 60} ชม.)")
     print("\n".join(lines))
 
 
