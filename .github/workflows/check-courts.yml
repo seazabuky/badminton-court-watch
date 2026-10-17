@@ -1,0 +1,52 @@
+name: Check courts
+
+on:
+  schedule:
+    # 04:07 UTC = 11:07 เวลาไทย ทุกวันศุกร์ เสาร์ อาทิตย์
+    - cron: "7 4 * * 5,6,0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: check-courts
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Bangkok
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Find adjacent free courts
+        run: |
+          set -o pipefail
+          python find_court_pairs.py --only-on any --state state.json --json latest.json 2>&1 | tee report.txt
+          {
+            echo '```'
+            cat report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json latest.json
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+          else
+            git commit -m "Update court availability $(date '+%Y-%m-%d %H:%M')"
+            git push
+          fi

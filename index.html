@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Piriya Court Watch</title>
+<meta name="description" content="คอร์ทแบดติดกัน 2 คอร์ทที่ว่างครบ 2 ชม. สนามแบดมินตันพิริยะ ศุกร์–อาทิตย์สัปดาห์หน้า">
+<meta name="theme-color" content="#f3f5f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1512" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2317603f'/%3E%3Cpath d='M9 23l7-14 7 14' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: one 980px column — header, poll cards, day tabs, start-time heat strip, per-pair timeline */
+:root {
+  --ground: #f3f5f4;
+  --surface: #ffffff;
+  --ink: #15201b;
+  --muted: #56655d;
+  --line: #dfe5e2;
+  --track: #f6f8f7;
+  --grid: #e3e9e6;
+  --accent: #17603f;
+  --accent-soft: #e1efe7;
+  --heat-rgb: 23, 96, 63;
+  --heat-hi-fg: #ffffff;
+  --heat-empty: #eef2f0;
+  --heat-empty-fg: #9aa8a0;
+  --rubber: #2a64a6; --rubber-soft: #e3ecf7; --rubber-ink: #1d4a7c;
+  --mastic: #a8550f; --mastic-soft: #f7e8da; --mastic-ink: #7a3d0a;
+  --warn-bg: #fff8ec; --warn-line: #ecd3a8; --warn-chip: #fbe6c4; --warn-ink: #6b3f05;
+  --bad-bg: #fdecea; --bad-line: #f1b8b1; --bad-ink: #7a1d14; --gone-bg: #fbe0dc;
+  --neutral-chip: #e8ecea; --neutral-ink: #33403a;
+  --font-body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0e1512; --surface: #151f1b; --ink: #e4ece8; --muted: #9caba3;
+    --line: #26332d; --track: #111a16; --grid: #1f2a25;
+    --accent: #5cc195; --accent-soft: #173326;
+    --heat-rgb: 92, 193, 149; --heat-hi-fg: #0b1410; --heat-empty: #18221e; --heat-empty-fg: #4f5d56;
+    --rubber: #3a78c4; --rubber-soft: #172638; --rubber-ink: #9cc3ef;
+    --mastic: #b8661f; --mastic-soft: #33220f; --mastic-ink: #f0b37a;
+    --warn-bg: #2a2010; --warn-line: #4f3c18; --warn-chip: #4a3510; --warn-ink: #f4cf8e;
+    --bad-bg: #2d1412; --bad-line: #5a2621; --bad-ink: #f3aea6; --gone-bg: #4a1d18;
+    --neutral-chip: #222c28; --neutral-ink: #c2cdc7;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0e1512; --surface: #151f1b; --ink: #e4ece8; --muted: #9caba3;
+  --line: #26332d; --track: #111a16; --grid: #1f2a25;
+  --accent: #5cc195; --accent-soft: #173326;
+  --heat-rgb: 92, 193, 149; --heat-hi-fg: #0b1410; --heat-empty: #18221e; --heat-empty-fg: #4f5d56;
+  --rubber: #3a78c4; --rubber-soft: #172638; --rubber-ink: #9cc3ef;
+  --mastic: #b8661f; --mastic-soft: #33220f; --mastic-ink: #f0b37a;
+  --warn-bg: #2a2010; --warn-line: #4f3c18; --warn-chip: #4a3510; --warn-ink: #f4cf8e;
+  --bad-bg: #2d1412; --bad-line: #5a2621; --bad-ink: #f3aea6; --gone-bg: #4a1d18;
+  --neutral-chip: #222c28; --neutral-ink: #c2cdc7;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--ground); color: var(--ink); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.55; -webkit-text-size-adjust: 100%;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(24px, env(safe-area-inset-top, 0px)) max(40px, env(safe-area-inset-bottom, 0px));
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+a { color: var(--accent); }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--accent); }
+h1 { margin: 0; font-size: 30px; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+h2 { margin: 0; font-size: 18px; font-weight: 600; }
+h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.stack { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.chip { display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+.chip.ok { background: var(--accent-soft); color: var(--accent); }
+.chip.first { background: var(--neutral-chip); color: var(--neutral-ink); }
+.chip.changed { background: var(--warn-chip); color: var(--warn-ink); }
+.chip.stale { background: var(--bad-bg); color: var(--bad-ink); }
+
+.notice { border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.notice.warn { background: var(--warn-bg); border: 1px solid var(--warn-line); }
+.notice.bad { background: var(--bad-bg); border: 1px solid var(--bad-line); color: var(--bad-ink); }
+.change { display: flex; gap: 10px; align-items: baseline; font-size: 14px; }
+.tag { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 4px; white-space: nowrap; font-family: var(--font-body); }
+.tag.gone { background: var(--gone-bg); color: var(--bad-ink); }
+.tag.added { background: var(--accent-soft); color: var(--accent); }
+
+.sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; }
+.poll { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.card {
+  text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 14px 16px;
+  border-radius: 12px; background: var(--surface); border: 1px solid var(--line); min-width: 0;
+}
+.card.active { border: 2px solid var(--ink); padding: 13px 15px; }
+.card .time { font-size: 26px; font-weight: 700; line-height: 1.15; }
+.card .count { font-size: 13px; color: var(--accent); font-weight: 600; }
+.card .pairs { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tab {
+  display: flex; flex-direction: column; align-items: flex-start; padding: 10px 14px; min-height: 44px;
+  border-radius: 10px; text-align: left; min-width: 0; background: var(--surface); border: 1px solid var(--line);
+}
+.tab[aria-selected="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+.tab .dow { font-weight: 600; font-size: 16px; }
+.tab .meta { font-size: 12px; margin-top: 2px; color: var(--muted); }
+.tab[aria-selected="true"] .meta { color: inherit; opacity: .75; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.scroll-x { overflow-x: auto; }
+.heat { display: flex; gap: 2px; min-width: 300px; }
+.heat .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.cell {
+  height: 44px; width: 100%; border-radius: 6px; border: 0; padding: 0;
+  font-family: var(--font-num); font-weight: 600; font-size: 14px;
+}
+.cell.sel { box-shadow: inset 0 0 0 2px var(--ink); }
+.hour { font-size: 11px; color: var(--muted); height: 14px; line-height: 14px; white-space: nowrap; }
+.detail { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.detail .when { font-size: 22px; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pair-chip { display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 15px; }
+.pair-chip small { font-family: var(--font-body); font-weight: 400; opacity: .85; font-size: 12px; }
+.f-rubber { background: var(--rubber-soft); color: var(--rubber-ink); }
+.f-mastic { background: var(--mastic-soft); color: var(--mastic-ink); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
+.sw.closed, .closed-zone { background: repeating-linear-gradient(135deg, var(--line) 0 3px, var(--track) 3px 7px); }
+.sw.sel { box-shadow: inset 0 0 0 2px var(--ink); }
+.tl { min-width: 300px; display: flex; flex-direction: column; gap: 6px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row .lbl { width: 48px; flex: 0 0 48px; font-weight: 600; font-size: 14px; }
+.axis { position: relative; flex: 1 1 auto; height: 16px; }
+.axis span { position: absolute; top: 0; font-size: 11px; color: var(--muted); transform: translateX(-50%); }
+.axis span.first { transform: none; }
+.axis span.last { transform: translateX(-100%); }
+.group-head { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; padding-top: 8px; }
+.group-head b { font-size: 14px; }
+.track {
+  position: relative; flex: 1 1 auto; height: 32px; border-radius: 6px; overflow: hidden;
+  background-color: var(--track);
+  background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px);
+}
+.track .closed-zone { position: absolute; top: 0; bottom: 0; left: 0; }
+.bar {
+  position: absolute; top: 3px; bottom: 3px; border-radius: 4px; color: #ffffff;
+  font-size: 12px; font-weight: 600; display: flex; align-items: center; padding: 0 6px; white-space: nowrap; overflow: hidden;
+}
+.bar.rubber { background: var(--rubber); }
+.bar.mastic { background: var(--mastic); }
+.band { position: absolute; top: 0; bottom: 0; box-shadow: inset 0 0 0 2px var(--ink); border-radius: 6px; pointer-events: none; }
+.empty { position: absolute; left: 8px; top: 0; bottom: 0; display: flex; align-items: center; font-size: 12px; color: var(--muted); }
+footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.skeleton { color: var(--muted); padding: 40px 0; }
+@media (max-width: 560px) {
+  h1 { font-size: 26px; }
+  .ax-odd { visibility: hidden; }
+  .hide-sm { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cell, .tab, .card { transition: background-color .15s, box-shadow .15s; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="stack">
+      <span class="eyebrow">สนามแบดมินตันพิริยะ</span>
+      <h1 class="num">คอร์ทติดกันว่าง 2 ชม.</h1>
+      <span class="muted">สัปดาห์หน้า <span class="num" id="range">ศุกร์–อาทิตย์</span></span>
+    </div>
+    <div class="stack" id="status"></div>
+  </header>
+  <div id="content"><p class="skeleton">กำลังโหลดข้อมูลล่าสุด…</p></div>
+  <footer>
+    <span>คู่คอร์ท = 2 คอร์ทที่อยู่ติดกันบนพื้นชนิดเดียวกัน · ข้อมูลจาก matchday</span>
+    <span>หน้านี้อ่านอย่างเดียว ไม่ได้จองคอร์ทให้ · อัปเดตอัตโนมัติทุกวันศุกร์ เสาร์ อาทิตย์ ราว 11 โมง</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const mins = (t) => { const p = t.split(':'); return Number(p[0]) * 60 + Number(p[1]); };
+  const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  const thDate = (iso) => { const p = iso.split('-').map(Number); return p[2] + ' ' + TH_MON[p[1] - 1]; };
+  const floorKey = (name) => (name || '').includes('ยาง') ? 'rubber' : 'mastic';
+  const shortRange = (a, b) => (a.endsWith(':00') && b.endsWith(':00')) ? a.slice(0, 2) + '–' + b.slice(0, 2) : a + '–' + b;
+
+  let D = null;
+  const state = { day: 0, slot: null };
+  const content = document.getElementById('content');
+
+  function bestSlot(day) {
+    let best = null;
+    (day.slots || []).forEach((s) => { if (!best || s.pairs.length > best.pairs.length) best = s; });
+    return best ? best.start : null;
+  }
+
+  function renderHeader() {
+    const first = D.days[0], last = D.days[D.days.length - 1];
+    document.getElementById('range').textContent = first.dow + ' ' + thDate(first.date) + ' – ' + last.dow + ' ' + thDate(last.date);
+    const ch = D.changes;
+    const n = ch ? ch.gone.length + ch.added.length : 0;
+    const [ud, ut] = D.updated.split(' ');
+    const ageDays = (Date.now() - new Date(ud + 'T' + ut + ':00+07:00').getTime()) / 864e5;
+    let chip;
+    if (ageDays > 7) chip = '<span class="chip stale">ข้อมูลเก่ากว่า 7 วัน</span>';
+    else if (!ch) chip = '<span class="chip first">รอบแรกของสัปดาห์นี้</span>';
+    else if (n === 0) chip = '<span class="chip ok">ไม่เปลี่ยนจากรอบก่อน</span>';
+    else chip = '<span class="chip changed">เปลี่ยน ' + n + ' รายการ</span>';
+    document.getElementById('status').innerHTML = chip +
+      '<span class="num small muted">อัปเดต ' + esc(thDate(ud) + ' ' + ut) + ' น.</span>';
+  }
+
+  function render() {
+    const dayIdx = Math.min(state.day, D.days.length - 1);
+    const day = D.days[dayIdx];
+    const dur = D.duration;
+    const slotStart = state.slot && (day.slots || []).some((s) => s.start === state.slot) ? state.slot : bestSlot(day);
+    const floorOfPair = {};
+    D.days.forEach((d) => (d.groups || []).forEach((g) => g.pairs.forEach((p) => { floorOfPair[p.label] = g.name; })));
+    const dowOf = {}; D.days.forEach((d) => { dowOf[d.date] = d.dow; });
+    let html = '';
+
+    // changes since last run
+    const ch = D.changes;
+    if (ch && (ch.gone.length || ch.added.length)) {
+      const line = (c, kind) => '<div class="change num"><span class="tag ' + kind + '">' + (kind === 'gone' ? 'หายไป' : 'ว่างเพิ่ม') +
+        '</span><span>' + esc(dowOf[c.date] + ' ' + thDate(c.date) + ' · คอร์ท ' + c.pair + ' · ' + c.block.replace('-', '–')) + '</span></div>';
+      html += '<section class="notice warn"><h3>เปลี่ยนจากรอบก่อน</h3>' +
+        ch.gone.map((c) => line(c, 'gone')).join('') + ch.added.map((c) => line(c, 'added')).join('') + '</section>';
+    }
+
+    // poll options
+    if (D.poll.length) {
+      html += '<section class="stack" style="gap:12px"><div class="sec-head"><h2>ตัวเลือกสำหรับ poll</h2>' +
+        '<span class="small muted">ช่วงที่มีคู่คอร์ทว่างมากที่สุด ไม่ซ้อนเวลากัน · แตะเพื่อดูรายละเอียด</span></div><div class="poll">' +
+        D.poll.map((p, i) => {
+          const di = D.days.findIndex((d) => d.date === p.date);
+          const active = di === dayIdx && p.start === slotStart;
+          return '<button type="button" class="card' + (active ? ' active' : '') + '" data-day="' + di + '" data-slot="' + esc(p.start) + '">' +
+            '<span class="small muted">ตัวเลือก ' + (i + 1) + '</span>' +
+            '<span style="font-weight:600">' + esc(p.dow + ' ' + thDate(p.date)) + '</span>' +
+            '<span class="time num">' + esc(p.start + '–' + p.end) + '</span>' +
+            '<span class="count">ว่าง ' + p.pairs.length + ' คู่</span>' +
+            '<span class="pairs num">' + esc(p.pairs.join(' · ')) + '</span></button>';
+        }).join('') + '</div></section>';
+    }
+
+    // day tabs
+    html += '<section class="stack" style="gap:16px"><div class="tabs" role="tablist" aria-label="เลือกวัน">' +
+      D.days.map((d, i) => {
+        const max = (d.slots || []).reduce((m, s) => Math.max(m, s.pairs.length), 0);
+        let meta;
+        if (!d.ok) meta = 'ดึงข้อมูลไม่สำเร็จ';
+        else if (d.closed) meta = 'สนามปิด';
+        else if (!d.slots.length) meta = 'ไม่มีช่วงว่าง';
+        else meta = d.slots.length + ' เวลาเริ่ม · สูงสุด ' + max + ' คู่';
+        return '<button type="button" class="tab" role="tab" aria-selected="' + (i === dayIdx) + '" data-day="' + i + '">' +
+          '<span class="dow">' + esc(d.dow) + '</span><span class="num small">' + esc(thDate(d.date)) + '</span>' +
+          '<span class="meta hide-sm">' + esc(meta) + '</span></button>';
+      }).join('') + '</div>';
+
+    if (!day.ok) {
+      html += '<div class="notice bad"><strong>ดึงข้อมูลวันนี้ไม่สำเร็จ</strong><span class="num small">' + esc(day.error || '') + '</span></div>';
+    } else if (day.closed) {
+      html += '<div class="notice warn"><strong>สนามปิดวันนี้</strong></div>';
+    } else {
+      const o = mins(day.open), c = mins(day.close), span = c - o;
+      const pct = (m) => ((m - o) / span * 100).toFixed(3) + '%';
+      const bySlot = {}; day.slots.forEach((s) => { bySlot[s.start] = s.pairs; });
+      const max = day.slots.reduce((m, s) => Math.max(m, s.pairs.length), 1);
+      const firstHour = Math.floor(o / 60);
+
+      // heat strip
+      let heat = '';
+      for (let t = o; t + dur <= c; t += 30) {
+        const key = hhmm(t), n = (bySlot[key] || []).length, ratio = n / max;
+        const bg = n === 0 ? 'var(--heat-empty)' : 'rgba(var(--heat-rgb), ' + (0.16 + 0.84 * ratio).toFixed(2) + ')';
+        const fg = n === 0 ? 'var(--heat-empty-fg)' : (ratio > 0.45 ? 'var(--heat-hi-fg)' : 'var(--ink)');
+        const hour = t % 60 === 0 ? String(t / 60) : '';
+        const odd = t % 60 === 0 && ((t / 60) - firstHour) % 2 === 1;
+        heat += '<div class="col"><button type="button" class="cell' + (key === slotStart ? ' sel' : '') + '" data-slot="' + key + '"' +
+          ' aria-label="เริ่ม ' + key + ' ว่าง ' + n + ' คู่" style="background:' + bg + ';color:' + fg + '">' + (n === 0 ? '·' : n) + '</button>' +
+          '<span class="hour num' + (odd ? ' ax-odd' : '') + '">' + hour + '</span></div>';
+      }
+      let detail;
+      if (slotStart) {
+        const pairs = bySlot[slotStart] || [];
+        detail = '<div class="sec-head" style="justify-content:flex-start;gap:4px 12px"><span class="when num">' + slotStart + '–' + hhmm(mins(slotStart) + dur) + '</span>' +
+          '<span class="muted small">' + esc(day.dow + ' ' + thDate(day.date)) + ' · ว่าง ' + pairs.length + ' คู่</span></div><div class="chips">' +
+          pairs.map((p) => '<span class="pair-chip num f-' + floorKey(floorOfPair[p]) + '">คอร์ท ' + esc(p) + '<small>' + esc(floorOfPair[p] || '') + '</small></span>').join('') + '</div>';
+      } else {
+        detail = '<span class="muted">วันนี้ไม่มีคู่คอร์ทติดกันที่ว่างครบ 2 ชม.</span>';
+      }
+      html += '<div class="panel"><div class="stack" style="gap:2px"><h3>เริ่มตีได้กี่โมง</h3>' +
+        '<span class="small muted">ตัวเลขในช่อง = จำนวนคู่คอร์ทที่ว่างครบ 2 ชม. ถ้าเริ่มเวลานั้น · แตะช่องเพื่อดูว่าคู่ไหน</span></div>' +
+        '<div class="scroll-x"><div class="heat">' + heat + '</div></div><div class="detail">' + detail + '</div></div>';
+
+      // timeline
+      let axis = '';
+      for (let t = Math.ceil(o / 60) * 60; t <= c; t += 60) {
+        const odd = ((t / 60) - firstHour) % 2 === 1;
+        axis += '<span class="num' + (t === o ? ' first' : t === c ? ' last' : '') + (odd ? ' ax-odd' : '') + '" style="left:' + pct(t) + '">' + (t / 60) + '</span>';
+      }
+      const gridSize = 'background-size:' + (60 / span * 100).toFixed(4) + '% 100%;background-position:' + (((Math.ceil(o / 60) * 60) - o) / span * 100).toFixed(4) + '% 0';
+      const band = slotStart ? '<span class="band" style="left:' + pct(mins(slotStart)) + ';width:' + (dur / span * 100).toFixed(3) + '%"></span>' : '';
+      let rows = '';
+      day.groups.forEach((g) => {
+        const fk = floorKey(g.name);
+        const note = (g.full.match(/\((.*)\)/) || [])[1];
+        const gOpen = mins(g.open);
+        rows += '<div class="group-head"><b style="color:var(--' + fk + '-ink)">' + esc(g.name) + '</b><span class="num small muted">' +
+          esc((note ? note + ' · ' : '') + 'เปิด ' + g.open + '–' + g.close) + '</span></div>';
+        g.pairs.forEach((p) => {
+          let inner = gOpen > o ? '<span class="closed-zone" style="width:' + pct(gOpen) + '"></span>' : '';
+          inner += p.blocks.map((b) => {
+            const a = mins(b.from), z = mins(b.to), len = z - a;
+            return '<span class="bar num ' + fk + '" title="คอร์ท ' + esc(p.label) + ' ว่าง ' + b.from + '–' + b.to + '" style="left:' + pct(a) + ';width:' + (len / span * 100).toFixed(3) + '%">' +
+              esc(len >= 240 ? b.from + '–' + b.to : shortRange(b.from, b.to)) + '</span>';
+          }).join('');
+          if (!p.blocks.length) inner += '<span class="empty">ไม่มีช่วงว่างครบ 2 ชม.</span>';
+          rows += '<div class="row"><span class="lbl num">' + esc(p.label) + '</span><div class="track" style="' + gridSize + '">' + inner + band + '</div></div>';
+        });
+      });
+      html += '<div class="panel"><div class="sec-head"><h3>ช่วงว่างของแต่ละคู่</h3><div class="legend">' +
+        '<span><i class="sw" style="background:var(--rubber)"></i>พื้นยาง</span>' +
+        '<span><i class="sw" style="background:var(--mastic)"></i>พื้นมาสติก</span>' +
+        '<span><i class="sw closed"></i>ยังไม่เปิด</span>' +
+        '<span><i class="sw sel"></i>เวลาที่เลือก</span></div></div>' +
+        '<div class="scroll-x"><div class="tl"><div class="row"><span class="lbl"></span><div class="axis">' + axis + '</div></div>' + rows + '</div></div></div>';
+    }
+    html += '</section>';
+    content.innerHTML = html;
+  }
+
+  content.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.dataset.day !== undefined) {
+      state.day = Number(btn.dataset.day);
+      state.slot = btn.dataset.slot || null;
+    } else if (btn.dataset.slot) {
+      state.slot = btn.dataset.slot;
+    }
+    render();
+  });
+
+  function pickInitialDay() {
+    // วันนี้ตรงกับวันเป้าหมายไหม ถ้าใช่เปิดวันนั้นก่อน (เวลาไทย)
+    const today = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
+    const i = D.days.findIndex((d) => d.date === today);
+    return i >= 0 ? i : 0;
+  }
+
+  fetch('latest.json', { cache: 'no-store' })
+    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then((data) => { D = data; state.day = pickInitialDay(); renderHeader(); render(); })
+    .catch((err) => {
+      content.innerHTML = '<div class="notice bad"><strong>โหลดข้อมูลไม่สำเร็จ</strong><span class="small">' + esc(err.message) + ' · ลองรีเฟรชหน้าอีกครั้ง</span></div>';
+    });
+})();
+</script>
+</body>
+</html>
