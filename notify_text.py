@@ -60,16 +60,20 @@ def ranges(starts: list[int], step: int = 30) -> str:
     return ", ".join(out)
 
 
-def slots(starts: list[int], dur: int) -> str:
+def slot_list(starts: list[int], dur: int) -> list[str]:
     """เวลาเริ่มที่เป็นไปได้ -> รอบเล่นยาว dur นาทีที่ไม่ซ้อนกัน ไล่จากเร็วสุด
-    [900, 930, 960] (dur 120) -> '15:00–17:00'
-    [900 ... 1140] -> '15:00–17:00, 17:00–19:00, 19:00–21:00'"""
+    [900, 930, 960] (dur 120) -> ['15:00–17:00']
+    [900 ... 1140] -> ['15:00–17:00', '17:00–19:00', '19:00–21:00']"""
     out, free_from = [], -1
     for s in sorted(set(starts)):
         if s >= free_from:
             out.append(f"{hhmm(s)}–{hhmm(s + dur)}")
             free_from = s + dur
-    return ", ".join(out)
+    return out
+
+
+def slots(starts: list[int], dur: int) -> str:
+    return ", ".join(slot_list(starts, dur))
 
 
 def pair_key(label: str) -> int:
@@ -166,12 +170,15 @@ def main() -> None:
             for floor, pairs in view.get(d["date"], {}).items():
                 before_floor = pview.get(d["date"], {}).get(floor, {})
                 for pair in sorted(set(pairs) | set(before_floor), key=pair_key):
-                    now_s, old_s = set(pairs.get(pair, [])), set(before_floor.get(pair, []))
+                    # เทียบเป็นรอบเล่นแบบเดียวกับที่แสดงด้านล่าง
+                    now_l = slot_list(pairs.get(pair, []), dur)
+                    old_l = slot_list(before_floor.get(pair, []), dur)
+                    now_s, old_s = set(now_l), set(old_l)
                     tag = f"{SHORT_DOW.get(dow_of[d['date']], '')} {th_date(d['date'])} {floor} {pair}"
                     if old_s - now_s:
-                        diffs.append(f"− หายไป {tag} {slots(list(old_s - now_s), dur)}")
+                        diffs.append(f"− หายไป {tag} {', '.join(x for x in old_l if x not in now_s)}")
                     if now_s - old_s:
-                        diffs.append(f"+ ว่างเพิ่ม {tag} {slots(list(now_s - old_s), dur)}")
+                        diffs.append(f"+ ว่างเพิ่ม {tag} {', '.join(x for x in now_l if x not in old_s)}")
         pu_d, pu_t = prev["updated"].split(" ")
         lines.append("")
         if diffs:
