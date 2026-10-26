@@ -2,8 +2,9 @@ name: Check courts
 
 on:
   schedule:
-    # 04:07 UTC = 11:07 เวลาไทย ทุกวันศุกร์ เสาร์ อาทิตย์
-    - cron: "7 4 * * 5,6,0"
+    # ทุกวัน วันละ 3 รอบ: 06:17 / 12:17 / 18:17 เวลาไทย (23:17 / 05:17 / 11:17 UTC)
+    # GitHub มักเลื่อนรอบ schedule ไปหลายชั่วโมง การรันหลายรอบช่วยให้ข้อมูลสดเสมอ
+    - cron: "17 23,5,11 * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,14 +16,16 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       TZ: Asia/Bangkok
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # ต้องใช้ประวัติเพื่อเทียบกับข้อมูลเมื่อวาน
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -41,7 +44,9 @@ jobs:
 
       - name: Build phone message
         run: |
-          python notify_text.py --from 15:00 --to 19:00 --prev git:HEAD > message.txt
+          # เทียบกับข้อมูลเมื่อ ~1 วันก่อน (ข้อความแจ้งเตือนส่งวันละครั้ง)
+          PREV=$(git rev-list -1 --before="20 hours ago" HEAD -- latest.json)
+          python notify_text.py --from 15:00 --to 19:00 --prev "git:${PREV:-HEAD}" > message.txt
           cat message.txt
 
       - name: Commit results

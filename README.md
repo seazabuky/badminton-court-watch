@@ -4,8 +4,10 @@
 สำหรับวันศุกร์ เสาร์ และอาทิตย์ของสัปดาห์ถัดไป
 
 - **หน้าเว็บ**: https://seazabuky.github.io/badminton-court-watch/ (`index.html` อ่าน `latest.json`)
-- **อัปเดตอัตโนมัติ**: workflow `Check courts` รันทุกวันศุกร์ เสาร์ อาทิตย์ ราว 11:07 เวลาไทย
-  แล้ว commit `latest.json` กับ `state.json` กลับเข้า repo
+- **อัปเดตอัตโนมัติ**: workflow `Check courts` รันทุกวัน วันละ 3 รอบ (ตั้งไว้ 06:17 / 12:17 / 18:17 เวลาไทย
+  GitHub อาจเลื่อนไปหลายชั่วโมง) แล้ว commit `latest.json`, `state.json`, `message.txt` กลับเข้า repo
+- **สัปดาห์เป้าหมาย**: ศุกร์–อาทิตย์ถัดไปที่ยังไม่ถึง เช่น อา. 25 ต.ค. ถึง พฤ. 29 ต.ค. ดู 30 ต.ค.–1 พ.ย.
+  พอถึงศุกร์ 30 ต.ค. จะเปลี่ยนไปดู 6–8 พ.ย.
 - **รันเองทันที**: แท็บ Actions → Check courts → Run workflow
 
 ## ไฟล์
