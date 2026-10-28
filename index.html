@@ -4,379 +4,635 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Piriya Court Watch</title>
-<meta name="description" content="คอร์ทแบดติดกัน 2 คอร์ทที่ว่างครบ 2 ชม. สนามแบดมินตันพิริยะ ศุกร์–อาทิตย์สัปดาห์หน้า">
-<meta name="theme-color" content="#f3f5f4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e1512" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2317603f'/%3E%3Cpath d='M9 23l7-14 7 14' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="description" content="คู่คอร์ทแบดติดกันที่ว่างครบ 2 ชม. สนามแบดมินตันพิริยะ ศุกร์–อาทิตย์สัปดาห์หน้า">
+<meta name="theme-color" content="#f2f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23141414'/%3E%3Crect x='7' y='8' width='8' height='16' rx='1' fill='none' stroke='%2334c07f' stroke-width='2'/%3E%3Crect x='17' y='8' width='8' height='16' rx='1' fill='none' stroke='%2334c07f' stroke-width='2'/%3E%3Cpath d='M7 16h18' stroke='%2334c07f' stroke-width='2'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Anuphan:wght@400;500;700&display=swap">
 <style>
-/* Layout: one 980px column — header, poll cards, day tabs, start-time heat strip, per-pair timeline */
+/*
+  Style: achromatic ledger (taste skill, seed 756221841). Shell: no sidebar (one screen).
+  Face: a sage ground from the court mat; the one hue (court green) only on free slots.
+  Grid: centred 1152px column, one 12px gap between cards; three full-width cards.
+        Answer card inside: 1110px = 7fr matrix + 32px gap + 5fr court map (about 629 + 32 + 449).
+*/
 :root {
-  --ground: #f3f5f4;
-  --surface: #ffffff;
-  --ink: #15201b;
-  --muted: #56655d;
-  --line: #dfe5e2;
-  --track: #f6f8f7;
-  --grid: #e3e9e6;
-  --accent: #17603f;
-  --accent-soft: #e1efe7;
-  --heat-rgb: 23, 96, 63;
-  --heat-hi-fg: #ffffff;
-  --heat-empty: #eef2f0;
-  --heat-empty-fg: #9aa8a0;
-  --rubber: #2a64a6; --rubber-soft: #e3ecf7; --rubber-ink: #1d4a7c;
-  --mastic: #a8550f; --mastic-soft: #f7e8da; --mastic-ink: #7a3d0a;
-  --warn-bg: #fff8ec; --warn-line: #ecd3a8; --warn-chip: #fbe6c4; --warn-ink: #6b3f05;
-  --bad-bg: #fdecea; --bad-line: #f1b8b1; --bad-ink: #7a1d14; --gone-bg: #fbe0dc;
-  --neutral-chip: #e8ecea; --neutral-ink: #33403a;
-  --font-body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-num: "Bai Jamjuree", "IBM Plex Sans Thai", system-ui, sans-serif;
+  --ground: #f2f5f2;  --surface: #ffffff;  --raised: #eef1ee;  --active: #e6e9e6;
+  --border: #e3e7e3;  --rule: #eef1ee;     --control: #d2d7d2;
+  --text: #0a0a0a;    --muted: #5f655f;    --faint: #6b706b;
+  --primary: #141414; --on-primary: #ffffff;
+  --hue: #18794e;     --hue-ink: #ffffff;  --hue-soft: rgba(24, 121, 78, .12);
+  --band: rgba(24, 121, 78, .07);
+  --closed: #e3e7e3;
+  --positive: #18794e; --negative: #c4242a;
+  --pill-warning-bg: #fffbeb; --pill-warning-line: #fde68a; --pill-warning-ink: #92400e;
+  --radius-card: 8px; --radius-control: 6px; --radius-chip: 4px;
+  --gap: 12px; --pad: 20px; --control-height: 36px;
+  --font: "Geist", "Anuphan", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-title: 24px; --fs-kpi: 30px; --fs-section: 16px; --fs-body: 14px; --fs-small: 12px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground: #0e1512; --surface: #151f1b; --ink: #e4ece8; --muted: #9caba3;
-    --line: #26332d; --track: #111a16; --grid: #1f2a25;
-    --accent: #5cc195; --accent-soft: #173326;
-    --heat-rgb: 92, 193, 149; --heat-hi-fg: #0b1410; --heat-empty: #18221e; --heat-empty-fg: #4f5d56;
-    --rubber: #3a78c4; --rubber-soft: #172638; --rubber-ink: #9cc3ef;
-    --mastic: #b8661f; --mastic-soft: #33220f; --mastic-ink: #f0b37a;
-    --warn-bg: #2a2010; --warn-line: #4f3c18; --warn-chip: #4a3510; --warn-ink: #f4cf8e;
-    --bad-bg: #2d1412; --bad-line: #5a2621; --bad-ink: #f3aea6; --gone-bg: #4a1d18;
-    --neutral-chip: #222c28; --neutral-ink: #c2cdc7;
+    --ground: #000000; --surface: #111111; --raised: #1a1a1a; --active: #222222;
+    --border: #232323; --rule: #1a1a1a;    --control: #3a3a3a;
+    --text: #ffffff;   --muted: #b4b4b4;   --faint: #949494;
+    --primary: #ffffff; --on-primary: #000000;
+    --hue: #3fc07a;    --hue-ink: #04130b; --hue-soft: rgba(63, 192, 122, .16);
+    --band: rgba(63, 192, 122, .08);
+    --closed: #262626;
+    --positive: #3fc07a; --negative: #e5566f;
+    --pill-warning-bg: #2a2010; --pill-warning-line: #4f3c18; --pill-warning-ink: #f4cf8e;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --ground: #0e1512; --surface: #151f1b; --ink: #e4ece8; --muted: #9caba3;
-  --line: #26332d; --track: #111a16; --grid: #1f2a25;
-  --accent: #5cc195; --accent-soft: #173326;
-  --heat-rgb: 92, 193, 149; --heat-hi-fg: #0b1410; --heat-empty: #18221e; --heat-empty-fg: #4f5d56;
-  --rubber: #3a78c4; --rubber-soft: #172638; --rubber-ink: #9cc3ef;
-  --mastic: #b8661f; --mastic-soft: #33220f; --mastic-ink: #f0b37a;
-  --warn-bg: #2a2010; --warn-line: #4f3c18; --warn-chip: #4a3510; --warn-ink: #f4cf8e;
-  --bad-bg: #2d1412; --bad-line: #5a2621; --bad-ink: #f3aea6; --gone-bg: #4a1d18;
-  --neutral-chip: #222c28; --neutral-ink: #c2cdc7;
+  --ground: #000000; --surface: #111111; --raised: #1a1a1a; --active: #222222;
+  --border: #232323; --rule: #1a1a1a;    --control: #3a3a3a;
+  --text: #ffffff;   --muted: #b4b4b4;   --faint: #949494;
+  --primary: #ffffff; --on-primary: #000000;
+  --hue: #3fc07a;    --hue-ink: #04130b; --hue-soft: rgba(63, 192, 122, .16);
+  --band: rgba(63, 192, 122, .08);
+  --closed: #262626;
+  --positive: #3fc07a; --negative: #e5566f;
+  --pill-warning-bg: #2a2010; --pill-warning-line: #4f3c18; --pill-warning-ink: #f4cf8e;
   color-scheme: dark;
 }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {
-  background: var(--ground); color: var(--ink); font-family: var(--font-body);
-  font-size: 15px; line-height: 1.55; -webkit-text-size-adjust: 100%;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: max(24px, env(safe-area-inset-top, 0px)) max(40px, env(safe-area-inset-bottom, 0px));
+  background: var(--ground); color: var(--text); font-family: var(--font);
+  font-size: var(--fs-body); line-height: 1.45; -webkit-text-size-adjust: 100%;
+  font-variant-numeric: tabular-nums;
 }
-button { font: inherit; color: inherit; cursor: pointer; }
-button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-a { color: var(--accent); }
-.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+button, a { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .muted { color: var(--muted); }
-.small { font-size: 13px; }
+.small { font-size: var(--fs-small); }
+.wrap { max-width: calc(1152px + 2 * 24px); margin: 0 auto; padding-inline: max(24px, env(safe-area-inset-left, 0px)); }
 
-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; }
-.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--accent); }
-h1 { margin: 0; font-size: 30px; line-height: 1.2; font-weight: 700; text-wrap: balance; }
-h2 { margin: 0; font-size: 18px; font-weight: 600; }
-h3 { margin: 0; font-size: 16px; font-weight: 600; }
-.stack { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.chip { display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
-.chip.ok { background: var(--accent-soft); color: var(--accent); }
-.chip.first { background: var(--neutral-chip); color: var(--neutral-ink); }
-.chip.changed { background: var(--warn-chip); color: var(--warn-ink); }
-.chip.stale { background: var(--bad-bg); color: var(--bad-ink); }
+/* top bar: the product and its scope */
+.bar { height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: env(safe-area-inset-top, 0px); box-sizing: content-box; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0; }
+.brand svg { flex: none; }
+.brand b { font-weight: 500; font-size: 14px; white-space: nowrap; }
+.brand span { color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-link { color: var(--muted); font-size: 14px; text-decoration: none; white-space: nowrap; }
+.bar-link:hover { color: var(--text); }
 
-.notice { border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
-.notice.warn { background: var(--warn-bg); border: 1px solid var(--warn-line); }
-.notice.bad { background: var(--bad-bg); border: 1px solid var(--bad-line); color: var(--bad-ink); }
-.change { display: flex; gap: 10px; align-items: baseline; font-size: 14px; }
-.tag { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 4px; white-space: nowrap; font-family: var(--font-body); }
-.tag.gone { background: var(--gone-bg); color: var(--bad-ink); }
-.tag.added { background: var(--accent-soft); color: var(--accent); }
+/* title row */
+.head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 24px; padding-top: 28px; padding-bottom: 20px; }
+.head-text { min-width: 0; flex: 1 1 520px; display: flex; flex-direction: column; gap: 6px; }
+h1 { margin: 0; font-size: var(--fs-title); line-height: 1.25; font-weight: 500; letter-spacing: -0.01em; }
+.finding { margin: 0; font-size: 15px; color: var(--muted); max-width: 70ch; }
+.finding strong { color: var(--text); font-weight: 500; }
+.head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.stamp { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.stamp.stale { color: var(--pill-warning-ink); background: var(--pill-warning-bg); border: 1px solid var(--pill-warning-line); padding: 4px 8px; border-radius: var(--radius-chip); }
 
-.sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; }
-.poll { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.card {
-  text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 14px 16px;
-  border-radius: 12px; background: var(--surface); border: 1px solid var(--line); min-width: 0;
-}
-.card.active { border: 2px solid var(--ink); padding: 13px 15px; }
-.card .time { font-size: 26px; font-weight: 700; line-height: 1.15; }
-.card .count { font-size: 13px; color: var(--accent); font-weight: 600; }
-.card .pairs { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.seg { display: inline-flex; background: var(--raised); border-radius: var(--radius-control); padding: 2px; height: var(--control-height); }
+.seg button { border: 0; background: transparent; padding: 0 12px; border-radius: 4px; color: var(--muted); font-size: 14px; white-space: nowrap; }
+.seg button { border: 1px solid transparent; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); font-weight: 500; border-color: var(--border); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: var(--control-height); padding: 0 14px; border-radius: var(--radius-control); border: 0; text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap; transition: transform .08s ease, background-color .12s ease; }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-primary:hover { opacity: .88; }
+.btn-secondary { background: var(--raised); color: var(--text); }
+.btn-secondary:hover { background: var(--active); }
 
-.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.tab {
-  display: flex; flex-direction: column; align-items: flex-start; padding: 10px 14px; min-height: 44px;
-  border-radius: 10px; text-align: left; min-width: 0; background: var(--surface); border: 1px solid var(--line);
-}
-.tab[aria-selected="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
-.tab .dow { font-weight: 600; font-size: 16px; }
-.tab .meta { font-size: 12px; margin-top: 2px; color: var(--muted); }
-.tab[aria-selected="true"] .meta { color: inherit; opacity: .75; }
+/* grid */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); }
+.span-12 { grid-column: 1 / -1; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: var(--pad); min-width: 0; }
+.card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 16px; }
+h2 { margin: 0; font-size: var(--fs-section); font-weight: 500; line-height: 1.3; }
+h3 { margin: 0; font-size: 14px; font-weight: 500; }
 
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
-.scroll-x { overflow-x: auto; }
-.heat { display: flex; gap: 2px; min-width: 300px; }
-.heat .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.cell {
-  height: 44px; width: 100%; border-radius: 6px; border: 0; padding: 0;
-  font-family: var(--font-num); font-weight: 600; font-size: 14px;
-}
-.cell.sel { box-shadow: inset 0 0 0 2px var(--ink); }
-.hour { font-size: 11px; color: var(--muted); height: 14px; line-height: 14px; white-space: nowrap; }
-.detail { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
-.detail .when { font-size: 22px; font-weight: 700; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.pair-chip { display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 15px; }
-.pair-chip small { font-family: var(--font-body); font-weight: 400; opacity: .85; font-size: 12px; }
-.f-rubber { background: var(--rubber-soft); color: var(--rubber-ink); }
-.f-mastic { background: var(--mastic-soft); color: var(--mastic-ink); }
+/* the answer: days x start times */
+.matrix-scroll { overflow-x: auto; margin-inline: -4px; padding: 4px; }
+.matrix { --lbl: 76px; --cmin: 30px; display: grid; gap: 4px; min-width: 0; }
+.matrix.all { --cmin: 26px; min-width: calc(76px + 25 * 30px); }
+.mx-corner, .mx-time { font-size: var(--fs-small); color: var(--muted); height: 18px; line-height: 18px; white-space: nowrap; }
+.mx-time { text-align: left; }
+.t-hr { display: none; }
+.mx-day { display: flex; flex-direction: column; justify-content: center; padding-right: 8px; min-width: 0; }
+.mx-day b { font-weight: 500; font-size: 14px; white-space: nowrap; }
+.mx-day span { font-size: var(--fs-small); color: var(--muted); white-space: nowrap; }
+.cell { height: 44px; min-width: 0; border: 0; border-radius: var(--radius-chip); padding: 0; font-size: 14px; font-weight: 500; outline-offset: -2px; }
+.cell.zero { background: var(--raised); color: var(--faint); font-weight: 400; }
+.cell:hover { outline: 1px solid var(--text); }
+.cell[aria-pressed="true"] { outline: 2px solid var(--text); }
+.mx-msg { grid-column: 2 / -1; display: flex; align-items: center; height: 44px; padding-inline: 12px; background: var(--raised); border-radius: var(--radius-chip); color: var(--muted); }
 
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+/* the answer card: matrix + changes on the left, the court map on the right */
+.answer { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "mx slot" "chg slot"; grid-template-rows: auto 1fr; column-gap: 32px; row-gap: 20px; align-items: start; }
+.a-matrix { grid-area: mx; min-width: 0; }
+.a-changes { grid-area: chg; min-width: 0; padding-top: 16px; border-top: 1px solid var(--rule); }
+.a-slot { grid-area: slot; min-width: 0; padding-left: 32px; border-left: 1px solid var(--rule); align-self: stretch; }
+
+/* selected slot */
+.slot { display: flex; flex-direction: column; gap: 16px; }
+.slot-head { display: flex; flex-direction: column; gap: 2px; }
+.slot-time { font-size: var(--fs-kpi); font-weight: 500; line-height: 1.15; letter-spacing: -0.01em; }
+.floors { display: flex; flex-direction: column; gap: 18px; }
+.floor { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.floor-name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.floor-name span { font-size: var(--fs-small); color: var(--muted); }
+.courts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-width: 420px; }
+.court { position: relative; height: 64px; border: 1px solid var(--control); border-radius: 3px; display: flex; justify-content: center; align-items: flex-start; padding-top: 6px; font-size: 13px; color: var(--faint); background: var(--surface); transition: background-color .12s ease; }
+.court::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--control); }
+.court span { line-height: 1.2; }
+.court.free { background: var(--hue-soft); border-color: var(--hue); color: var(--text); font-weight: 500; }
+.court.free::after { border-top-color: var(--hue); opacity: .5; }
+.court.lit { outline: 2px solid var(--text); outline-offset: 1px; }
+.pairs { display: flex; flex-wrap: wrap; gap: 6px; }
+.pair { flex: none; height: 32px; padding: 0 10px; border-radius: var(--radius-control); border: 1px solid var(--control); background: var(--surface); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.pair:hover { border-color: var(--text); }
+.pair[aria-pressed="true"] { border-color: var(--text); outline: 1px solid var(--text); outline-offset: -2px; }
+.none { color: var(--muted); font-size: 13px; line-height: 32px; }
+
+/* poll: one divided strip, as many columns as options */
+.poll-title { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.poll { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+.poll li + li { border-left: 1px solid var(--border); }
+.poll button { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 14px 16px; border: 0; background: transparent; text-align: left; }
+.poll button:hover { background: var(--raised); }
+.poll button[aria-current="true"] { background: var(--active); }
+.poll .day { color: var(--muted); font-size: 13px; }
+.poll .time { font-size: 20px; font-weight: 500; line-height: 1.3; }
+.poll .n { color: var(--muted); font-size: 13px; }
+.poll .n b { color: var(--hue); font-weight: 500; }
+.poll .empty-msg { padding: 14px 16px; color: var(--muted); grid-column: 1 / -1; }
+.copy-row { display: flex; align-items: center; gap: 12px; }
+.copied { font-size: 13px; color: var(--muted); }
+.changes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.changes li { display: flex; gap: 8px; align-items: baseline; }
+.sign { flex: none; width: 14px; font-weight: 500; }
+.sign.gone { color: var(--negative); } .sign.added { color: var(--positive); }
+
+/* timeline */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: var(--fs-small); color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
-.sw { width: 14px; height: 10px; border-radius: 3px; display: inline-block; }
-.sw.closed, .closed-zone { background: repeating-linear-gradient(135deg, var(--line) 0 3px, var(--track) 3px 7px); }
-.sw.sel { box-shadow: inset 0 0 0 2px var(--ink); }
-.tl { min-width: 300px; display: flex; flex-direction: column; gap: 6px; }
-.row { display: flex; gap: 8px; align-items: center; }
-.row .lbl { width: 48px; flex: 0 0 48px; font-weight: 600; font-size: 14px; }
-.axis { position: relative; flex: 1 1 auto; height: 16px; }
-.axis span { position: absolute; top: 0; font-size: 11px; color: var(--muted); transform: translateX(-50%); }
-.axis span.first { transform: none; }
-.axis span.last { transform: translateX(-100%); }
-.group-head { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; padding-top: 8px; }
-.group-head b { font-size: 14px; }
-.track {
-  position: relative; flex: 1 1 auto; height: 32px; border-radius: 6px; overflow: hidden;
-  background-color: var(--track);
-  background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px);
+.sw { display: inline-block; width: 16px; height: 10px; border-radius: 2px; }
+.sw.free { background: var(--hue); }
+.sw.closed { background: var(--closed); }
+.sw.band { background: var(--band); border: 1px solid var(--hue-soft); }
+.sw.sel { border: 2px solid var(--text); }
+.daytabs { display: inline-flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; width: 100%; }
+.daytabs button { border: 0; background: transparent; padding: 8px 2px; margin-right: 20px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 14px; white-space: nowrap; }
+.daytabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+.tl-scroll { overflow-x: auto; }
+.tl { min-width: 560px; display: flex; flex-direction: column; position: relative; }
+.tl-sel { position: absolute; top: 24px; bottom: 0; left: calc(64px + (100% - 64px) * var(--a)); width: calc((100% - 64px) * var(--w)); border: 2px solid var(--text); border-radius: 4px; pointer-events: none; }
+.tl-row { display: flex; align-items: center; gap: 12px; }
+.tl-lbl { flex: 0 0 52px; font-weight: 500; font-size: 14px; }
+.tl-axis { position: relative; flex: 1 1 auto; height: 20px; }
+.tl-axis span { position: absolute; top: 0; font-size: var(--fs-small); color: var(--muted); transform: translateX(-50%); }
+.tl-axis span.first { transform: none; } .tl-axis span.last { transform: translateX(-100%); }
+.tl-group { display: flex; align-items: baseline; gap: 8px; padding: 14px 0 6px; }
+.tl-group span { font-size: var(--fs-small); color: var(--muted); }
+.tl-group > * { position: relative; z-index: 1; background: var(--surface); padding-right: 4px; }
+.track { position: relative; flex: 1 1 auto; height: 32px; margin: 2px 0; }
+.track .grid-h { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--rule); }
+.track .bandz { position: absolute; top: 0; bottom: 0; background: var(--band); }
+.track .closedz { position: absolute; top: 6px; bottom: 6px; left: 0; border-radius: 3px; background: var(--closed); }
+.track .fb { position: absolute; top: 6px; bottom: 6px; border-radius: 3px; background: var(--hue); color: var(--hue-ink); font-size: var(--fs-small); font-weight: 500; display: flex; align-items: center; padding: 0 6px; white-space: nowrap; overflow: hidden; }
+.track .empty { position: absolute; left: 8px; top: 0; bottom: 0; display: flex; align-items: center; font-size: var(--fs-small); color: var(--muted); }
+
+/* states */
+.sk { display: block; background: var(--raised); border-radius: 4px; }
+.err { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 14px 16px; border: 1px dashed var(--control); border-radius: var(--radius-card); color: var(--muted); }
+.err strong { color: var(--text); font-weight: 500; }
+.linkbtn { border: 0; background: none; padding: 0; text-decoration: underline; text-underline-offset: 3px; color: var(--text); }
+
+footer { padding-block: 28px max(36px, env(safe-area-inset-bottom, 0px)); color: var(--muted); font-size: 13px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; }
+footer a { color: var(--text); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* tablet and phone: one column */
+@media (max-width: 1023px) {
+  .answer { grid-template-columns: minmax(0, 1fr); grid-template-areas: "mx" "slot" "chg"; }
+  .a-slot { padding-left: 0; border-left: 0; padding-top: 20px; border-top: 1px solid var(--rule); }
+  .courts { max-width: none; }
 }
-.track .closed-zone { position: absolute; top: 0; bottom: 0; left: 0; }
-.bar {
-  position: absolute; top: 3px; bottom: 3px; border-radius: 4px; color: #ffffff;
-  font-size: 12px; font-weight: 600; display: flex; align-items: center; padding: 0 6px; white-space: nowrap; overflow: hidden;
+@media (max-width: 640px) {
+  .wrap { padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
+  .brand span { display: none; }
+  .head { padding-top: 16px; padding-bottom: 16px; }
+  h1 { font-size: 22px; }
+  .head-actions { width: 100%; }
+  .seg { flex: 1 1 auto; } .seg button { flex: 1 1 0; }
+  .head-actions .btn-primary { flex: 1 1 100%; height: 44px; }
+  .stamp { width: 100%; order: -1; }
+  .card { padding: 16px; }
+  .slot-time { font-size: 26px; }
+  .court { height: 56px; }
+  .poll { grid-template-columns: minmax(0, 1fr); }
+  .poll li + li { border-left: 0; border-top: 1px solid var(--border); }
+  .poll button { flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 10px; padding: 12px 14px; }
+  .poll .time { font-size: 17px; }
+  .poll .n { margin-left: auto; }
+  .card-head .copy-row { width: 100%; }
+  .card-head .copy-row .btn { flex: 1 1 auto; height: 44px; }
+  .cell { height: 40px; font-size: 13px; }
+  .mx-time.half { visibility: hidden; }
+  .tl-axis span.odd { display: none; }
+  .matrix { --lbl: 54px; --cmin: 24px; }
+  .t-full { display: none; } .t-hr { display: inline; }
+  .matrix.all { min-width: calc(54px + 25 * 28px); }
+  .mx-day b { font-size: 13px; }
+  .tl { min-width: 0; }
+  .tl-lbl { flex-basis: 44px; font-size: 13px; }
+  .tl-row { gap: 8px; }
+  .tl-sel { left: calc(52px + (100% - 52px) * var(--a)); width: calc((100% - 52px) * var(--w)); }
+  .track .fb.short { color: transparent; }
 }
-.bar.rubber { background: var(--rubber); }
-.bar.mastic { background: var(--mastic); }
-.band { position: absolute; top: 0; bottom: 0; box-shadow: inset 0 0 0 2px var(--ink); border-radius: 6px; pointer-events: none; }
-.empty { position: absolute; left: 8px; top: 0; bottom: 0; display: flex; align-items: center; font-size: 12px; color: var(--muted); }
-footer { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
-.skeleton { color: var(--muted); padding: 40px 0; }
-@media (max-width: 560px) {
-  h1 { font-size: 26px; }
-  .ax-odd { visibility: hidden; }
-  .hide-sm { display: none; }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .cell, .tab, .card { transition: background-color .15s, box-shadow .15s; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
 }
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
-  <header>
-    <div class="stack">
-      <span class="eyebrow">สนามแบดมินตันพิริยะ</span>
-      <h1 class="num">คอร์ทติดกันว่าง 2 ชม.</h1>
-      <span class="muted">สัปดาห์หน้า <span class="num" id="range">ศุกร์–อาทิตย์</span></span>
-    </div>
-    <div class="stack" id="status"></div>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="./" aria-label="Piriya Court Watch หน้าแรก">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="16" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="4" width="8" height="16" rx="1.5" fill="none" stroke="var(--hue)" stroke-width="1.6"/><path d="M3 12h18" stroke="currentColor" stroke-width="1.6"/></svg>
+      <b>Piriya Court Watch</b>
+      <span>สนามแบดมินตันพิริยะ</span>
+    </a>
+    <a class="bar-link" href="https://github.com/seazabuky/badminton-court-watch">GitHub</a>
   </header>
-  <div id="content"><p class="skeleton">กำลังโหลดข้อมูลล่าสุด…</p></div>
+
+  <section class="head" aria-labelledby="title">
+    <div class="head-text">
+      <h1 id="title">คอร์ทว่างสุดสัปดาห์หน้า</h1>
+      <p class="finding" id="finding"><span class="sk" style="width:320px;height:16px;margin-top:4px"></span></p>
+    </div>
+    <div class="head-actions">
+      <span class="stamp" id="stamp">กำลังโหลด…</span>
+      <div class="seg" role="group" aria-label="ช่วงเวลาเริ่มเล่น">
+        <button type="button" id="mode-window" aria-pressed="true">เริ่ม 15:00–19:00</button>
+        <button type="button" id="mode-all" aria-pressed="false">ทั้งวัน</button>
+      </div>
+      <a class="btn btn-primary" href="https://portal.matchday.co.th/" target="_blank" rel="noopener">จองที่ Matchday</a>
+    </div>
+  </section>
+
+  <main class="grid" id="main">
+    <section class="card span-12 answer" aria-labelledby="h-matrix">
+      <div class="a-matrix">
+        <div class="card-head">
+          <h2 id="h-matrix">คู่ที่ว่างครบ 2 ชม. ตามเวลาเริ่ม</h2>
+          <span class="small muted" id="matrix-scope">ศุกร์–อาทิตย์</span>
+        </div>
+        <div id="matrix-body">
+          <span class="sk" style="height:44px;margin-bottom:4px"></span>
+          <span class="sk" style="height:44px;margin-bottom:4px"></span>
+          <span class="sk" style="height:44px"></span>
+        </div>
+      </div>
+      <div class="a-changes">
+        <h3 id="h-changes" style="margin-bottom:8px">เปลี่ยนจากรอบก่อน</h3>
+        <div id="changes" class="small muted">—</div>
+      </div>
+      <div class="a-slot slot" id="slot" hidden></div>
+    </section>
+
+    <section class="card span-12" aria-labelledby="h-poll">
+      <div class="card-head">
+        <div class="poll-title">
+          <h2 id="h-poll">ตัวเลือกสำหรับ poll</h2>
+          <span class="small muted" id="poll-scope"></span>
+        </div>
+        <div class="copy-row">
+          <span class="copied" id="copied" role="status" aria-live="polite"></span>
+          <button type="button" class="btn btn-secondary" id="copy">คัดลอกข้อความ poll</button>
+        </div>
+      </div>
+      <ol class="poll" id="poll"><li><span class="sk" style="height:72px"></span></li></ol>
+    </section>
+
+    <section class="card span-12" aria-labelledby="h-tl">
+      <div class="card-head" style="margin-bottom:12px">
+        <h2 id="h-tl">ช่วงว่างของแต่ละคู่</h2>
+        <div class="legend">
+          <span><i class="sw free"></i>ว่าง</span>
+          <span><i class="sw closed"></i>โซนยังไม่เปิด / ปิดแล้ว</span>
+          <span id="lg-band"><i class="sw band"></i>ช่วงที่สนใจ</span>
+          <span><i class="sw sel"></i>เวลาที่เลือก</span>
+        </div>
+      </div>
+      <div class="daytabs" role="tablist" aria-label="เลือกวัน" id="daytabs"></div>
+      <div class="tl-scroll"><div class="tl" id="tl"></div></div>
+    </section>
+  </main>
+
   <footer>
-    <span>คู่คอร์ท = 2 คอร์ทที่อยู่ติดกันบนพื้นชนิดเดียวกัน · ข้อมูลจาก matchday</span>
-    <span>หน้านี้อ่านอย่างเดียว ไม่ได้จองคอร์ทให้ · อัปเดตอัตโนมัติทุกวันศุกร์ เสาร์ อาทิตย์ ราว 11 โมง</span>
+    <span>ข้อมูลจาก Matchday · หน้านี้อ่านอย่างเดียว ไม่ได้จองคอร์ทให้ · อัปเดตอัตโนมัติวันละ 3 รอบ</span>
+    <a href="https://github.com/seazabuky/badminton-court-watch">ดูโค้ดบน GitHub</a>
   </footer>
 </div>
 
 <script>
 (() => {
   const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const SHORT = { 'จันทร์': 'จ.', 'อังคาร': 'อ.', 'พุธ': 'พ.', 'พฤหัส': 'พฤ.', 'ศุกร์': 'ศ.', 'เสาร์': 'ส.', 'อาทิตย์': 'อา.' };
+  const WINDOW = { from: 15 * 60, to: 19 * 60 };   // เริ่มเล่นเร็วสุด–ช้าสุด
+  const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const mins = (t) => { const p = t.split(':'); return Number(p[0]) * 60 + Number(p[1]); };
+  const mins = (t) => { const p = t.split(':'); return +p[0] * 60 + +p[1]; };
   const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
   const thDate = (iso) => { const p = iso.split('-').map(Number); return p[2] + ' ' + TH_MON[p[1] - 1]; };
-  const floorKey = (name) => (name || '').includes('ยาง') ? 'rubber' : 'mastic';
-  const shortRange = (a, b) => (a.endsWith(':00') && b.endsWith(':00')) ? a.slice(0, 2) + '–' + b.slice(0, 2) : a + '–' + b;
+  const dayShort = (d) => (SHORT[d.dow] || d.dow) + ' ' + thDate(d.date);
+  const pairNum = (p) => +p.split('+')[0];
 
   let D = null;
-  const state = { day: 0, slot: null };
-  const content = document.getElementById('content');
+  const st = { mode: 'window', day: 0, slot: null, lit: null };
+  try { if (localStorage.getItem('cw-mode') === 'all') st.mode = 'all'; } catch (e) {}
 
-  function bestSlot(day) {
-    let best = null;
-    (day.slots || []).forEach((s) => { if (!best || s.pairs.length > best.pairs.length) best = s; });
-    return best ? best.start : null;
+  // ── derived data ──
+  function floorOf() {
+    const map = {};
+    D.days.forEach((d) => (d.groups || []).forEach((g) => g.pairs.forEach((p) => { map[p.label] = g.name; })));
+    return map;
+  }
+  function inScope(start) {
+    if (st.mode === 'all') return true;
+    const m = mins(start);
+    return m >= WINDOW.from && m <= WINDOW.to;
+  }
+  function slotsOf(d) { return (d.slots || []).filter((s) => inScope(s.start)); }
+  function columns() {
+    // เวลาเริ่มทุก 30 นาทีในขอบเขต: ช่วงที่สนใจ หรือ ตั้งแต่เปิดถึงเริ่มช้าสุดของวัน
+    let lo, hi;
+    if (st.mode === 'window') { lo = WINDOW.from; hi = WINDOW.to; }
+    else {
+      const ok = D.days.filter((d) => d.ok && !d.closed && d.open);
+      lo = Math.min(...ok.map((d) => mins(d.open)));
+      hi = Math.max(...ok.map((d) => mins(d.close))) - D.duration;
+    }
+    const out = []; for (let t = lo; t <= hi; t += 30) out.push(hhmm(t)); return out;
+  }
+  function best() {
+    let b = null;
+    D.days.forEach((d, i) => slotsOf(d).forEach((s) => { if (!b || s.pairs.length > b.n) b = { day: i, start: s.start, n: s.pairs.length }; }));
+    return b;
+  }
+  function pollPicks() {
+    const per = [], dur = D.duration;
+    D.days.forEach((d, i) => {
+      const ss = slotsOf(d).filter((s) => s.pairs.length);
+      if (!ss.length) return;
+      const top = ss.reduce((a, s) => (s.pairs.length > a.pairs.length ? s : a));
+      per.push({ day: i, start: top.start, n: top.pairs.length });
+    });
+    const picks = per.slice();
+    const rest = [];
+    D.days.forEach((d, i) => slotsOf(d).forEach((s) => { if (s.pairs.length) rest.push({ day: i, start: s.start, n: s.pairs.length }); }));
+    rest.sort((a, b) => b.n - a.n || a.day - b.day || mins(a.start) - mins(b.start));
+    for (const r of rest) {
+      if (picks.length >= 4) break;
+      if (!picks.some((p) => p.day === r.day && Math.abs(mins(p.start) - mins(r.start)) < dur)) picks.push(r);
+    }
+    return picks.sort((a, b) => a.day - b.day || mins(a.start) - mins(b.start));
   }
 
+  // ── header ──
   function renderHeader() {
     const first = D.days[0], last = D.days[D.days.length - 1];
-    document.getElementById('range').textContent = first.dow + ' ' + thDate(first.date) + ' – ' + last.dow + ' ' + thDate(last.date);
-    const ch = D.changes;
-    const n = ch ? ch.gone.length + ch.added.length : 0;
     const [ud, ut] = D.updated.split(' ');
-    const ageDays = (Date.now() - new Date(ud + 'T' + ut + ':00+07:00').getTime()) / 864e5;
-    let chip;
-    if (ageDays > 7) chip = '<span class="chip stale">ข้อมูลเก่ากว่า 7 วัน</span>';
-    else if (!ch) chip = '<span class="chip first">รอบแรกของสัปดาห์นี้</span>';
-    else if (n === 0) chip = '<span class="chip ok">ไม่เปลี่ยนจากรอบก่อน</span>';
-    else chip = '<span class="chip changed">เปลี่ยน ' + n + ' รายการ</span>';
-    document.getElementById('status').innerHTML = chip +
-      '<span class="num small muted">อัปเดต ' + esc(thDate(ud) + ' ' + ut) + ' น.</span>';
+    const age = (Date.now() - new Date(ud + 'T' + ut + ':00+07:00').getTime()) / 3600e3;
+    const stamp = $('stamp');
+    stamp.textContent = 'อัปเดต ' + thDate(ud) + ' ' + ut + ' น.';
+    stamp.classList.toggle('stale', age > 24);
+    if (age > 24) stamp.textContent += ' · ข้อมูลเก่ากว่า 1 วัน';
+    $('mode-window').setAttribute('aria-pressed', st.mode === 'window');
+    $('mode-all').setAttribute('aria-pressed', st.mode === 'all');
+
+    const range = dayShort(first) + ' – ' + dayShort(last);
+    const b = best();
+    const empty = D.days.filter((d) => d.ok && !d.closed && !slotsOf(d).some((s) => s.pairs.length));
+    const failed = D.days.filter((d) => !d.ok);
+    let html = esc(range) + ' · ';
+    if (b) html += 'ว่างมากสุด <strong>' + esc(dayShort(D.days[b.day]) + ' ' + b.start + '–' + hhmm(mins(b.start) + D.duration)) + '</strong> ' + b.n + ' คู่';
+    else html += '<strong>ไม่มีคู่ว่างเลย' + (st.mode === 'window' ? 'ในช่วง 15:00–19:00' : '') + '</strong>';
+    if (b && empty.length) html += ' · ' + empty.map((d) => '<strong>' + esc(dayShort(d)) + '</strong>').join(', ') + ' ไม่มีคู่ว่าง' + (st.mode === 'window' ? 'ในช่วงนี้' : '');
+    if (failed.length) html += ' · ดึงข้อมูล ' + failed.map((d) => esc(dayShort(d))).join(', ') + ' ไม่สำเร็จ';
+    $('finding').innerHTML = html;
+    $('matrix-scope').textContent = st.mode === 'window' ? 'เริ่ม 15:00–19:00' : 'ทั้งวัน';
+    $('poll-scope').textContent = st.mode === 'window' ? 'เริ่ม 15:00–19:00' : 'ทั้งวัน';
+  }
+
+  // ── the answer: matrix ──
+  function renderMatrix() {
+    const cols = columns();
+    const max = Math.max(1, ...D.days.flatMap((d) => slotsOf(d).map((s) => s.pairs.length)));
+    const showAll = st.mode === 'all';
+    let h = '<div class="matrix' + (showAll ? ' all' : '') + '" style="grid-template-columns: var(--lbl) repeat(' + cols.length + ', minmax(var(--cmin), 1fr))">';
+    h += '<span class="mx-corner"></span>';
+    cols.forEach((c) => {
+      const half = c.endsWith(':30');
+      const label = showAll ? (half ? '' : String(+c.slice(0, 2))) : '<span class="t-full">' + c + '</span><span class="t-hr">' + (+c.slice(0, 2)) + '</span>';
+      h += '<span class="mx-time num' + (half && !showAll ? ' half' : '') + '">' + label + '</span>';
+    });
+    D.days.forEach((d, i) => {
+      h += '<div class="mx-day"><b>' + esc(d.dow) + '</b><span>' + esc(thDate(d.date)) + '</span></div>';
+      if (!d.ok) { h += '<div class="mx-msg">ดึงข้อมูลวันนี้ไม่สำเร็จ ลองใหม่รอบถัดไป</div>'; return; }
+      if (d.closed) { h += '<div class="mx-msg">สนามปิด</div>'; return; }
+      const by = {}; (d.slots || []).forEach((s) => { by[s.start] = s.pairs.length; });
+      cols.forEach((c) => {
+        const n = by[c] || 0;
+        const sel = i === st.day && c === st.slot;
+        const label = dayShort(d) + ' เริ่ม ' + c + ' ว่าง ' + n + ' คู่';
+        if (n === 0) {
+          h += '<button type="button" class="cell zero" data-day="' + i + '" data-slot="' + c + '" aria-pressed="' + sel + '" aria-label="' + esc(label) + '">0</button>';
+        } else {
+          const a = (0.18 + 0.82 * n / max).toFixed(2);
+          const ink = n / max > 0.45 ? 'var(--hue-ink)' : 'var(--text)';
+          h += '<button type="button" class="cell" data-day="' + i + '" data-slot="' + c + '" aria-pressed="' + sel + '" aria-label="' + esc(label) + '" style="background: color-mix(in srgb, var(--hue) ' + Math.round(a * 100) + '%, var(--surface)); color:' + ink + '">' + n + '</button>';
+        }
+      });
+    });
+    h += '</div>';
+    $('matrix-body').innerHTML = '<div class="matrix-scroll">' + h + '</div>';
+  }
+
+  // ── the selected slot: court map ──
+  function renderSlot() {
+    const box = $('slot');
+    const d = D.days[st.day];
+    if (!d || !d.ok || d.closed || !st.slot) { box.hidden = true; return; }
+    box.hidden = false;
+    const start = mins(st.slot), end = start + D.duration;
+    const s = (d.slots || []).find((x) => x.start === st.slot);
+    const free = new Set(s ? s.pairs : []);
+    const fo = floorOf();
+    const per = {}; (d.groups || []).forEach((g) => { per[g.name] = g.pairs.filter((p) => free.has(p.label)).length; });
+    let h = '<div class="slot-head"><span class="muted">' + esc(d.dow + ' ' + thDate(d.date)) + '</span><span class="slot-time num">' + st.slot + '–' + hhmm(end) + '</span>' +
+      '<span class="muted">ว่าง <b style="color:var(--text);font-weight:500">' + free.size + '</b> คู่' +
+      ((d.groups || []).length ? ' · ' + d.groups.map((g) => esc(g.name) + ' ' + per[g.name]).join(' · ') : '') + '</span></div>';
+    h += '<div class="floors">';
+    (d.groups || []).forEach((g) => {
+      const note = (g.full.match(/\((.*)\)/) || [])[1];
+      const nums = [...new Set(g.pairs.flatMap((p) => p.label.split('+').map(Number)))].sort((a, b) => a - b);
+      const freeCourts = new Set(g.pairs.filter((p) => free.has(p.label)).flatMap((p) => p.label.split('+').map(Number)));
+      const lit = st.lit && fo[st.lit] === g.name ? st.lit.split('+').map(Number) : [];
+      h += '<div class="floor"><div class="floor-name"><h3>' + esc(g.name) + '</h3><span>' + esc((note ? note + ' · ' : '') + 'เปิด ' + g.open + '–' + g.close) + '</span></div>';
+      h += '<div class="courts" aria-hidden="true">' + nums.map((n) =>
+        '<div class="court' + (freeCourts.has(n) ? ' free' : '') + (lit.includes(n) ? ' lit' : '') + '"><span class="num">' + n + '</span></div>').join('') + '</div>';
+      const fp = g.pairs.filter((p) => free.has(p.label)).sort((a, b) => pairNum(a.label) - pairNum(b.label));
+      h += '<div class="pairs">' + (fp.length ? fp.map((p) =>
+        '<button type="button" class="pair num" data-pair="' + esc(p.label) + '" aria-pressed="' + (st.lit === p.label) + '" aria-label="คอร์ท ' + esc(p.label) + ' ' + esc(g.name) + '">คอร์ท ' + esc(p.label) + '</button>').join('')
+        : '<span class="none">ไม่มีคู่ว่างบน' + esc(g.name) + 'ช่วงนี้</span>') + '</div></div>';
+    });
+    h += '</div>';
+    box.innerHTML = h;
+  }
+
+  // ── poll ──
+  function renderPoll() {
+    const picks = pollPicks(), list = $('poll');
+    if (!picks.length) {
+      list.style.setProperty('--n', 1);
+      list.innerHTML = '<li class="empty-msg">ยังไม่มีช่วงที่ว่าง' + (st.mode === 'window' ? 'ในช่วงเริ่ม 15:00–19:00 ลองกด “ทั้งวัน”' : '') + '</li>';
+      $('copy').disabled = true; return;
+    }
+    $('copy').disabled = false;
+    list.style.setProperty('--n', picks.length);
+    list.innerHTML = picks.map((p) => {
+      const d = D.days[p.day];
+      const cur = p.day === st.day && p.start === st.slot;
+      return '<li><button type="button" data-day="' + p.day + '" data-slot="' + p.start + '" aria-current="' + cur + '">' +
+        '<span class="day">' + esc(dayShort(d)) + '</span><span class="time num">' + p.start + '–' + hhmm(mins(p.start) + D.duration) + '</span>' +
+        '<span class="n num">ว่าง <b>' + p.n + '</b> คู่</span></button></li>';
+    }).join('');
+  }
+  function pollText() {
+    const lines = ['ตีแบดสัปดาห์หน้า วันไหนดี?', ''];
+    pollPicks().forEach((p, i) => {
+      lines.push((i + 1) + '. ' + dayShort(D.days[p.day]) + ' ' + p.start + '–' + hhmm(mins(p.start) + D.duration));
+    });
+    return lines.join('\n');
+  }
+
+  // ── changes ──
+  function renderChanges() {
+    const ch = D.changes, el = $('changes');
+    const since = D.changes_since ? ' (' + thDate(D.changes_since.slice(0, 10)) + ' ' + D.changes_since.slice(11, 16) + ')' : '';
+    $('h-changes').textContent = 'เปลี่ยนจากรอบก่อน' + since;
+    if (!ch) { el.textContent = 'รอบแรกของสัปดาห์นี้ ยังไม่มีอะไรให้เทียบ'; return; }
+    const all = [...ch.gone.map((c) => ({ ...c, k: 'gone' })), ...ch.added.map((c) => ({ ...c, k: 'added' }))];
+    if (!all.length) { el.textContent = 'ไม่มีอะไรเปลี่ยน'; return; }
+    const day = {}; D.days.forEach((d) => { day[d.date] = d; });
+    const shown = all.slice(0, 5);
+    el.className = '';
+    el.innerHTML = '<ul class="changes">' + shown.map((c) =>
+      '<li><span class="sign ' + c.k + '" aria-hidden="true">' + (c.k === 'gone' ? '−' : '+') + '</span><span>' +
+      (c.k === 'gone' ? 'หายไป ' : 'ว่างเพิ่ม ') + esc((day[c.date] ? dayShort(day[c.date]) : c.date) + ' คอร์ท ' + c.pair + ' ' + c.block.replace('-', '–')) + '</span></li>').join('') +
+      (all.length > shown.length ? '<li class="muted"><span class="sign"></span><span>และอีก ' + (all.length - shown.length) + ' รายการ</span></li>' : '') + '</ul>';
+  }
+
+  // ── timeline ──
+  function renderTimeline() {
+    $('daytabs').innerHTML = D.days.map((d, i) =>
+      '<button type="button" role="tab" aria-selected="' + (i === st.day) + '" data-day="' + i + '">' + esc(dayShort(d)) + '</button>').join('');
+    $('lg-band').hidden = st.mode !== 'window';
+    const d = D.days[st.day], tl = $('tl');
+    if (!d.ok) { tl.innerHTML = '<div class="err"><strong>ดึงข้อมูล' + esc(dayShort(d)) + 'ไม่สำเร็จ</strong><span>' + esc(d.error || '') + '</span></div>'; return; }
+    if (d.closed) { tl.innerHTML = '<div class="err"><strong>สนามปิดวันนี้</strong></div>'; return; }
+    const o = mins(d.open), c = mins(d.close), span = c - o;
+    const pct = (m) => ((m - o) / span * 100).toFixed(3) + '%';
+    let axis = '', grid = '';
+    const firstH = Math.ceil(o / 60);
+    for (let t = firstH * 60; t <= c; t += 60) {
+      const cls = (t === o ? 'first' : t === c ? 'last' : '') + ((t / 60 - firstH) % 2 ? ' odd' : '');
+      axis += '<span class="num ' + cls + '" style="left:' + pct(t) + '">' + (t / 60) + '</span>';
+      if (t > o && t < c) grid += '<i class="grid-h" style="left:' + pct(t) + '"></i>';
+    }
+    const band = st.mode === 'window'
+      ? '<i class="bandz" style="left:' + pct(Math.max(o, WINDOW.from)) + ';width:' + ((Math.min(c, WINDOW.to + D.duration) - Math.max(o, WINDOW.from)) / span * 100).toFixed(3) + '%"></i>' : '';
+    const sel = st.slot ? '<i class="tl-sel" style="--a:' + ((mins(st.slot) - o) / span).toFixed(4) + ';--w:' + (D.duration / span).toFixed(4) + '"></i>' : '';
+    let h = '<div class="tl-row"><span class="tl-lbl"></span><div class="tl-axis">' + axis + '</div></div>';
+    d.groups.forEach((g) => {
+      const note = (g.full.match(/\((.*)\)/) || [])[1];
+      h += '<div class="tl-group"><h3>' + esc(g.name) + '</h3><span>' + esc((note ? note + ' · ' : '') + 'เปิด ' + g.open + '–' + g.close) + '</span></div>';
+      const gOpen = mins(g.open), gClose = mins(g.close);
+      g.pairs.slice().sort((a, b) => pairNum(a.label) - pairNum(b.label)).forEach((p) => {
+        let inner = grid + band;
+        if (gOpen > o) inner += '<i class="closedz" style="width:' + pct(gOpen) + '"></i>';
+        if (gClose < c) inner += '<i class="closedz" style="left:' + pct(gClose) + ';right:0;width:auto"></i>';
+        inner += p.blocks.map((b) => {
+          const a = mins(b.from), z = mins(b.to), len = z - a;
+          return '<span class="fb num' + (len < 300 ? ' short' : '') + '" title="คอร์ท ' + esc(p.label) + ' ว่าง ' + b.from + '–' + b.to + '" style="left:' + pct(a) + ';width:' + (len / span * 100).toFixed(3) + '%">' + (len >= 120 ? b.from + '–' + b.to : '') + '</span>';
+        }).join('');
+        if (!p.blocks.length) inner += '<span class="empty">ไม่มีช่วงว่างครบ 2 ชม.</span>';
+        h += '<div class="tl-row"><span class="tl-lbl num">' + esc(p.label) + '</span><div class="track">' + inner + '</div></div>';
+      });
+    });
+    tl.innerHTML = h + sel;
   }
 
   function render() {
-    const dayIdx = Math.min(state.day, D.days.length - 1);
-    const day = D.days[dayIdx];
-    const dur = D.duration;
-    const slotStart = state.slot && (day.slots || []).some((s) => s.start === state.slot) ? state.slot : bestSlot(day);
-    const floorOfPair = {};
-    D.days.forEach((d) => (d.groups || []).forEach((g) => g.pairs.forEach((p) => { floorOfPair[p.label] = g.name; })));
-    const dowOf = {}; D.days.forEach((d) => { dowOf[d.date] = d.dow; });
-    let html = '';
-
-    // changes since last run
-    const ch = D.changes;
-    if (ch && (ch.gone.length || ch.added.length)) {
-      const line = (c, kind) => '<div class="change num"><span class="tag ' + kind + '">' + (kind === 'gone' ? 'หายไป' : 'ว่างเพิ่ม') +
-        '</span><span>' + esc(dowOf[c.date] + ' ' + thDate(c.date) + ' · คอร์ท ' + c.pair + ' · ' + c.block.replace('-', '–')) + '</span></div>';
-      html += '<section class="notice warn"><h3>เปลี่ยนจากรอบก่อน</h3>' +
-        ch.gone.map((c) => line(c, 'gone')).join('') + ch.added.map((c) => line(c, 'added')).join('') + '</section>';
-    }
-
-    // poll options
-    if (D.poll.length) {
-      html += '<section class="stack" style="gap:12px"><div class="sec-head"><h2>ตัวเลือกสำหรับ poll</h2>' +
-        '<span class="small muted">ช่วงที่มีคู่คอร์ทว่างมากที่สุด ไม่ซ้อนเวลากัน · แตะเพื่อดูรายละเอียด</span></div><div class="poll">' +
-        D.poll.map((p, i) => {
-          const di = D.days.findIndex((d) => d.date === p.date);
-          const active = di === dayIdx && p.start === slotStart;
-          return '<button type="button" class="card' + (active ? ' active' : '') + '" data-day="' + di + '" data-slot="' + esc(p.start) + '">' +
-            '<span class="small muted">ตัวเลือก ' + (i + 1) + '</span>' +
-            '<span style="font-weight:600">' + esc(p.dow + ' ' + thDate(p.date)) + '</span>' +
-            '<span class="time num">' + esc(p.start + '–' + p.end) + '</span>' +
-            '<span class="count">ว่าง ' + p.pairs.length + ' คู่</span>' +
-            '<span class="pairs num">' + esc(p.pairs.join(' · ')) + '</span></button>';
-        }).join('') + '</div></section>';
-    }
-
-    // day tabs
-    html += '<section class="stack" style="gap:16px"><div class="tabs" role="tablist" aria-label="เลือกวัน">' +
-      D.days.map((d, i) => {
-        const max = (d.slots || []).reduce((m, s) => Math.max(m, s.pairs.length), 0);
-        let meta;
-        if (!d.ok) meta = 'ดึงข้อมูลไม่สำเร็จ';
-        else if (d.closed) meta = 'สนามปิด';
-        else if (!d.slots.length) meta = 'ไม่มีช่วงว่าง';
-        else meta = d.slots.length + ' เวลาเริ่ม · สูงสุด ' + max + ' คู่';
-        return '<button type="button" class="tab" role="tab" aria-selected="' + (i === dayIdx) + '" data-day="' + i + '">' +
-          '<span class="dow">' + esc(d.dow) + '</span><span class="num small">' + esc(thDate(d.date)) + '</span>' +
-          '<span class="meta hide-sm">' + esc(meta) + '</span></button>';
-      }).join('') + '</div>';
-
-    if (!day.ok) {
-      html += '<div class="notice bad"><strong>ดึงข้อมูลวันนี้ไม่สำเร็จ</strong><span class="num small">' + esc(day.error || '') + '</span></div>';
-    } else if (day.closed) {
-      html += '<div class="notice warn"><strong>สนามปิดวันนี้</strong></div>';
-    } else {
-      const o = mins(day.open), c = mins(day.close), span = c - o;
-      const pct = (m) => ((m - o) / span * 100).toFixed(3) + '%';
-      const bySlot = {}; day.slots.forEach((s) => { bySlot[s.start] = s.pairs; });
-      const max = day.slots.reduce((m, s) => Math.max(m, s.pairs.length), 1);
-      const firstHour = Math.floor(o / 60);
-
-      // heat strip
-      let heat = '';
-      for (let t = o; t + dur <= c; t += 30) {
-        const key = hhmm(t), n = (bySlot[key] || []).length, ratio = n / max;
-        const bg = n === 0 ? 'var(--heat-empty)' : 'rgba(var(--heat-rgb), ' + (0.16 + 0.84 * ratio).toFixed(2) + ')';
-        const fg = n === 0 ? 'var(--heat-empty-fg)' : (ratio > 0.45 ? 'var(--heat-hi-fg)' : 'var(--ink)');
-        const hour = t % 60 === 0 ? String(t / 60) : '';
-        const odd = t % 60 === 0 && ((t / 60) - firstHour) % 2 === 1;
-        heat += '<div class="col"><button type="button" class="cell' + (key === slotStart ? ' sel' : '') + '" data-slot="' + key + '"' +
-          ' aria-label="เริ่ม ' + key + ' ว่าง ' + n + ' คู่" style="background:' + bg + ';color:' + fg + '">' + (n === 0 ? '·' : n) + '</button>' +
-          '<span class="hour num' + (odd ? ' ax-odd' : '') + '">' + hour + '</span></div>';
-      }
-      let detail;
-      if (slotStart) {
-        const pairs = bySlot[slotStart] || [];
-        detail = '<div class="sec-head" style="justify-content:flex-start;gap:4px 12px"><span class="when num">' + slotStart + '–' + hhmm(mins(slotStart) + dur) + '</span>' +
-          '<span class="muted small">' + esc(day.dow + ' ' + thDate(day.date)) + ' · ว่าง ' + pairs.length + ' คู่</span></div><div class="chips">' +
-          pairs.map((p) => '<span class="pair-chip num f-' + floorKey(floorOfPair[p]) + '">คอร์ท ' + esc(p) + '<small>' + esc(floorOfPair[p] || '') + '</small></span>').join('') + '</div>';
-      } else {
-        detail = '<span class="muted">วันนี้ไม่มีคู่คอร์ทติดกันที่ว่างครบ 2 ชม.</span>';
-      }
-      html += '<div class="panel"><div class="stack" style="gap:2px"><h3>เริ่มตีได้กี่โมง</h3>' +
-        '<span class="small muted">ตัวเลขในช่อง = จำนวนคู่คอร์ทที่ว่างครบ 2 ชม. ถ้าเริ่มเวลานั้น · แตะช่องเพื่อดูว่าคู่ไหน</span></div>' +
-        '<div class="scroll-x"><div class="heat">' + heat + '</div></div><div class="detail">' + detail + '</div></div>';
-
-      // timeline
-      let axis = '';
-      for (let t = Math.ceil(o / 60) * 60; t <= c; t += 60) {
-        const odd = ((t / 60) - firstHour) % 2 === 1;
-        axis += '<span class="num' + (t === o ? ' first' : t === c ? ' last' : '') + (odd ? ' ax-odd' : '') + '" style="left:' + pct(t) + '">' + (t / 60) + '</span>';
-      }
-      const gridSize = 'background-size:' + (60 / span * 100).toFixed(4) + '% 100%;background-position:' + (((Math.ceil(o / 60) * 60) - o) / span * 100).toFixed(4) + '% 0';
-      const band = slotStart ? '<span class="band" style="left:' + pct(mins(slotStart)) + ';width:' + (dur / span * 100).toFixed(3) + '%"></span>' : '';
-      let rows = '';
-      day.groups.forEach((g) => {
-        const fk = floorKey(g.name);
-        const note = (g.full.match(/\((.*)\)/) || [])[1];
-        const gOpen = mins(g.open);
-        rows += '<div class="group-head"><b style="color:var(--' + fk + '-ink)">' + esc(g.name) + '</b><span class="num small muted">' +
-          esc((note ? note + ' · ' : '') + 'เปิด ' + g.open + '–' + g.close) + '</span></div>';
-        g.pairs.forEach((p) => {
-          let inner = gOpen > o ? '<span class="closed-zone" style="width:' + pct(gOpen) + '"></span>' : '';
-          inner += p.blocks.map((b) => {
-            const a = mins(b.from), z = mins(b.to), len = z - a;
-            return '<span class="bar num ' + fk + '" title="คอร์ท ' + esc(p.label) + ' ว่าง ' + b.from + '–' + b.to + '" style="left:' + pct(a) + ';width:' + (len / span * 100).toFixed(3) + '%">' +
-              esc(len >= 240 ? b.from + '–' + b.to : shortRange(b.from, b.to)) + '</span>';
-          }).join('');
-          if (!p.blocks.length) inner += '<span class="empty">ไม่มีช่วงว่างครบ 2 ชม.</span>';
-          rows += '<div class="row"><span class="lbl num">' + esc(p.label) + '</span><div class="track" style="' + gridSize + '">' + inner + band + '</div></div>';
-        });
-      });
-      html += '<div class="panel"><div class="sec-head"><h3>ช่วงว่างของแต่ละคู่</h3><div class="legend">' +
-        '<span><i class="sw" style="background:var(--rubber)"></i>พื้นยาง</span>' +
-        '<span><i class="sw" style="background:var(--mastic)"></i>พื้นมาสติก</span>' +
-        '<span><i class="sw closed"></i>ยังไม่เปิด</span>' +
-        '<span><i class="sw sel"></i>เวลาที่เลือก</span></div></div>' +
-        '<div class="scroll-x"><div class="tl"><div class="row"><span class="lbl"></span><div class="axis">' + axis + '</div></div>' + rows + '</div></div></div>';
-    }
-    html += '</section>';
-    content.innerHTML = html;
+    renderHeader(); renderMatrix(); renderSlot(); renderPoll(); renderChanges(); renderTimeline();
+  }
+  function selectBest() {
+    const b = best();
+    if (b) { st.day = b.day; st.slot = b.start; } else { st.slot = null; }
+    st.lit = null;
   }
 
-  content.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    if (btn.dataset.day !== undefined) {
-      state.day = Number(btn.dataset.day);
-      state.slot = btn.dataset.slot || null;
-    } else if (btn.dataset.slot) {
-      state.slot = btn.dataset.slot;
+  // ── events ──
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button');
+    if (!t || !D) return;
+    if (t.id === 'mode-window' || t.id === 'mode-all') {
+      st.mode = t.id === 'mode-all' ? 'all' : 'window';
+      try { localStorage.setItem('cw-mode', st.mode); } catch (err) {}
+      if (!st.slot || !inScope(st.slot)) selectBest();
+      render(); return;
     }
-    render();
+    if (t.id === 'copy') {
+      const text = pollText();
+      const done = (ok) => { $('copied').textContent = ok ? 'คัดลอกแล้ว' : 'คัดลอกไม่ได้ ลองกดค้างที่ข้อความแทน'; setTimeout(() => { $('copied').textContent = ''; }, 2500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => done(true), () => done(false));
+      else done(false);
+      return;
+    }
+    if (t.dataset.pair) { st.lit = st.lit === t.dataset.pair ? null : t.dataset.pair; renderSlot(); return; }
+    if (t.dataset.day !== undefined) {
+      const day = +t.dataset.day;
+      if (t.dataset.slot) { st.day = day; st.slot = t.dataset.slot; }
+      else {
+        st.day = day;
+        const has = (D.days[day].slots || []).some((s) => s.start === st.slot);
+        if (!has) { const ss = slotsOf(D.days[day]).filter((s) => s.pairs.length); st.slot = ss.length ? ss.reduce((a, s) => (s.pairs.length > a.pairs.length ? s : a)).start : (st.mode === 'window' ? hhmm(WINDOW.from) : null); }
+      }
+      st.lit = null;
+      render();
+    }
+  });
+  $('daytabs').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const n = D.days.length; st.day = (st.day + (e.key === 'ArrowRight' ? 1 : n - 1)) % n;
+    render(); $('daytabs').querySelector('[aria-selected="true"]').focus();
   });
 
-  function pickInitialDay() {
-    // วันนี้ตรงกับวันเป้าหมายไหม ถ้าใช่เปิดวันนั้นก่อน (เวลาไทย)
-    const today = new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);
-    const i = D.days.findIndex((d) => d.date === today);
-    return i >= 0 ? i : 0;
+  function load() {
+    fetch('latest.json', { cache: 'no-store' })
+      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then((data) => { D = data; selectBest(); render(); })
+      .catch((err) => {
+        $('stamp').textContent = 'โหลดข้อมูลไม่สำเร็จ';
+        $('finding').textContent = 'ยังแสดงข้อมูลไม่ได้';
+        $('matrix-body').innerHTML = '<div class="err"><strong>โหลดข้อมูลคอร์ทไม่สำเร็จ</strong><span>' + esc(err.message) + '</span><button type="button" class="linkbtn" id="retry">ลองใหม่</button></div>';
+        $('retry').onclick = load;
+      });
   }
-
-  fetch('latest.json', { cache: 'no-store' })
-    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then((data) => { D = data; state.day = pickInitialDay(); renderHeader(); render(); })
-    .catch((err) => {
-      content.innerHTML = '<div class="notice bad"><strong>โหลดข้อมูลไม่สำเร็จ</strong><span class="small">' + esc(err.message) + ' · ลองรีเฟรชหน้าอีกครั้ง</span></div>';
-    });
+  load();
 })();
 </script>
 </body>

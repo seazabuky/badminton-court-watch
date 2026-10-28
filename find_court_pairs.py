@@ -677,21 +677,23 @@ def main() -> None:
         print("  [!] ข้อมูลไม่ครบทุกวัน — ไม่บันทึก state รอบนี้", file=sys.stderr)
     save_state = len(all_rows) == len(days)
 
-    prev = None
+    prev, prev_at = None, None
     if args.state and args.state.exists():
         try:
             saved = json.loads(args.state.read_text(encoding="utf-8"))
             if saved.get("target") == f"{days[0]:%Y-%m-%d}":   # เทียบเฉพาะเป้าหมายเดียวกัน
                 prev = saved.get("rows")
+                prev_at = saved.get("ran_at")
         except (json.JSONDecodeError, OSError):
             pass
 
     report(all_rows, args, prev)
 
     if args.json:
-        args.json.write_text(json.dumps(
-            build_json(days, all_rows, courts_by_day, errors, args, layout, prev),
-            ensure_ascii=False, indent=1), encoding="utf-8")
+        out = build_json(days, all_rows, courts_by_day, errors, args, layout, prev)
+        # เวลาของรอบที่ใช้เทียบ "changes" (หน้าเว็บแสดงว่าเทียบกับเมื่อไหร่)
+        out["changes_since"] = prev_at[:16].replace("T", " ") if prev_at else None
+        args.json.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
     if args.state and save_state:
         args.state.write_text(json.dumps(
