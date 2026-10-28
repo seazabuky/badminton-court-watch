@@ -603,6 +603,8 @@ def main() -> None:
     p.add_argument("--cache", type=Path, default=None, help="โฟลเดอร์ cache (debug)")
     p.add_argument("--lines", type=Path, default=None,
                    help="โฟลเดอร์ไฟล์ <YYYY-MM-DD>.txt รูปแบบบรรทัด COURT/MATCH (โหมด cloud)")
+    p.add_argument("--weeks", type=int, default=1,
+                   help="ดึงกี่สุดสัปดาห์ (1 = สัปดาห์หน้า, 3 = สัปดาห์หน้าและอีก 2 สัปดาห์ถัดไป)")
     p.add_argument("--json", type=Path, default=None,
                    help="เขียนผลแบบมีโครงสร้างลงไฟล์นี้ (ใช้แสดงบนหน้าเว็บ)")
     p.add_argument("--dump-raw", metavar="YYYY-MM-DD")
@@ -653,53 +655,75 @@ def main() -> None:
 
     if args.target_friday:
         fri = datetime.strptime(args.target_friday, "%Y-%m-%d").date()
-        days = [fri, fri + timedelta(days=1), fri + timedelta(days=2)]
+        base = [fri, fri + timedelta(days=1), fri + timedelta(days=2)]
     else:
-        days = next_week_targets(today)
+        base = next_week_targets(today)
+    weeks = [[d + timedelta(days=7 * w) for d in base] for w in range(max(1, args.weeks))]
 
     print(f"รันวัน {TH_DAY[today.weekday()]} {today:%d/%m} → "
-          f"ดึงข้อมูล {days[0]:%d/%m} - {days[-1]:%d/%m}")
+          f"ดึงข้อมูล {len(weeks)} สุดสัปดาห์ เริ่ม {base[0]:%d/%m}")
 
-    all_rows: dict[date, list[dict]] = {}
-    courts_by_day: dict[date, dict] = {}
-    errors: dict[date, str] = {}
-    for d in days:
-        try:
-            courts_by_day[d] = parse_day(fetch_day(d, args.cache, args.lines), d)
-            all_rows[d] = analyse(d, courts_by_day[d], args, layout)
-        except Exception as exc:
-            errors[d] = f"{type(exc).__name__}: {exc}"
-            print(f"  [!] {d}: {type(exc).__name__}: {exc}", file=sys.stderr)
-
-    if not all_rows:
-        sys.exit("ดึงข้อมูลไม่สำเร็จสักวัน — ห้ามเดาข้อมูลเอง ให้ตรวจ API ก่อน")
-    if len(all_rows) < len(days):
-        print("  [!] ข้อมูลไม่ครบทุกวัน — ไม่บันทึก state รอบนี้", file=sys.stderr)
-    save_state = len(all_rows) == len(days)
-
-    prev, prev_at = None, None
+    # state: {"targets": {"YYYY-MM-DD": {"ran_at": ..., "rows": ...}}} (อ่านรูปแบบเก่าได้ด้วย)
+    saved_targets: dict = {}
     if args.state and args.state.exists():
         try:
             saved = json.loads(args.state.read_text(encoding="utf-8"))
-            if saved.get("target") == f"{days[0]:%Y-%m-%d}":   # เทียบเฉพาะเป้าหมายเดียวกัน
-                prev = saved.get("rows")
-                prev_at = saved.get("ran_at")
+            if "targets" in saved:
+                saved_targets = saved["targets"]
+            elif saved.get("target"):
+                saved_targets = {saved["target"]: {"ran_at": saved.get("ran_at"), "rows": saved.get("rows")}}
         except (json.JSONDecodeError, OSError):
             pass
 
-    report(all_rows, args, prev)
+    week_json: list[dict] = []
+    new_targets: dict = {}
+    any_ok = False
+    for wi, days in enumerate(weeks):
+        target = f"{days[0]:%Y-%m-%d}"
+        all_rows: dict[date, list[dict]] = {}
+        courts_by_day: dict[date, dict] = {}
+        errors: dict[date, str] = {}
+        for d in days:
+            try:
+                courts_by_day[d] = parse_day(fetch_day(d, args.cache, args.lines), d)
+                all_rows[d] = analyse(d, courts_by_day[d], args, layout)
+            except Exception as exc:
+                errors[d] = f"{type(exc).__name__}: {exc}"
+                print(f"  [!] {d}: {type(exc).__name__}: {exc}", file=sys.stderr)
+        any_ok = any_ok or bool(all_rows)
+
+        prev_entry = saved_targets.get(target) or {}
+        prev, prev_at = prev_entry.get("rows"), prev_entry.get("ran_at")
+
+        if len(weeks) > 1:
+            print(f"\n▶ สุดสัปดาห์ที่ {wi + 1}: {days[0]:%d/%m} - {days[-1]:%d/%m}")
+        if all_rows:
+            report(all_rows, args, prev)
+
+        if len(all_rows) == len(days):
+            new_targets[target] = {"ran_at": datetime.now().isoformat(), "rows": snapshot(all_rows)}
+        else:
+            print(f"  [!] {target}: ข้อมูลไม่ครบทุกวัน — ไม่บันทึก state ของสัปดาห์นี้", file=sys.stderr)
+            if target in saved_targets:
+                new_targets[target] = saved_targets[target]   # เก็บของเดิมไว้เทียบรอบหน้า
+
+        wj = build_json(days, all_rows, courts_by_day, errors, args, layout, prev if all_rows else None)
+        # เวลาของรอบที่ใช้เทียบ "changes" (หน้าเว็บแสดงว่าเทียบกับเมื่อไหร่)
+        wj["changes_since"] = prev_at[:16].replace("T", " ") if prev_at and all_rows else None
+        week_json.append(wj)
+
+    if not any_ok:
+        sys.exit("ดึงข้อมูลไม่สำเร็จสักวัน — ห้ามเดาข้อมูลเอง ให้ตรวจ API ก่อน")
 
     if args.json:
-        out = build_json(days, all_rows, courts_by_day, errors, args, layout, prev)
-        # เวลาของรอบที่ใช้เทียบ "changes" (หน้าเว็บแสดงว่าเทียบกับเมื่อไหร่)
-        out["changes_since"] = prev_at[:16].replace("T", " ") if prev_at else None
+        # ระดับบนสุด = สุดสัปดาห์แรก (ให้ notify_text.py และโค้ดเดิมใช้ต่อได้) + "weeks" ครบทุกสัปดาห์
+        out = dict(week_json[0])
+        out["weeks"] = week_json
         args.json.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    if args.state and save_state:
-        args.state.write_text(json.dumps(
-            {"target": f"{days[0]:%Y-%m-%d}", "ran_at": datetime.now().isoformat(),
-             "rows": snapshot(all_rows)}, ensure_ascii=False, indent=2), encoding="utf-8")
-
+    if args.state:
+        args.state.write_text(json.dumps({"targets": new_targets}, ensure_ascii=False, indent=2),
+                              encoding="utf-8")
 
 if __name__ == "__main__":
     main()

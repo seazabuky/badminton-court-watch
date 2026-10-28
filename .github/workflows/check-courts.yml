@@ -35,7 +35,7 @@ jobs:
       - name: Find adjacent free courts
         run: |
           set -o pipefail
-          python find_court_pairs.py --only-on any --state state.json --json latest.json 2>&1 | tee report.txt
+          python find_court_pairs.py --only-on any --weeks 3 --state state.json --json latest.json 2>&1 | tee report.txt
           {
             echo '```'
             cat report.txt
